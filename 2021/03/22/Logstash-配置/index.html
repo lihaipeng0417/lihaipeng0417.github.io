@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Logstash-配置 | 七路灯</title>
+  <meta name="description" content="Logstash配置介绍、插件说明、配置说明、高级配置、命令说明基于7.11版本。https:&#x2F;&#x2F;www.elastic.co&#x2F;guide&#x2F;en&#x2F;logstash&#x2F;7.11&#x2F;index.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Logstash-配置">
+<meta property="og:url" content="http://www.lights8080.xyz/2021/03/22/Logstash-%E9%85%8D%E7%BD%AE/index.html">
+<meta property="og:site_name" content="七路灯">
+<meta property="og:description" content="Logstash配置介绍、插件说明、配置说明、高级配置、命令说明基于7.11版本。https:&#x2F;&#x2F;www.elastic.co&#x2F;guide&#x2F;en&#x2F;logstash&#x2F;7.11&#x2F;index.html">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-22T03:27:15.000Z">
+<meta property="article:modified_time" content="2021-05-27T03:47:46.000Z">
+<meta property="article:author" content="七路灯">
+<meta property="article:tag" content="技术">
+<meta property="article:tag" content="ELK">
+<meta property="article:tag" content="Logstash">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.lights8080.xyz/2021/03/22/Logstash-%E9%85%8D%E7%BD%AE/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="七路灯" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="../images/favicon.ico" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/lights8080" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">七路灯</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">从事互联网开发，信奉终身成长的技术人</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Beijing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lights8080" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="https://www.zhihu.com/people/lights8080" target="_blank" title="Zhihu" data-toggle=tooltip data-placement=top><i class="icon icon-zhihu"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎关注公众号共同交流学习!</p>
+            </div>
+            <div class="content">
+                <img src="/../images/gongzhonghao-qrcode.jpg" alt="site.qrcode_alt" title="site.qrcode_title" />
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><span class="category-list-count">6</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a><span class="category-list-count">6</span></li></ul></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/ELK/" rel="tag">ELK</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Elasticsearch/" rel="tag">Elasticsearch</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Logstash/" rel="tag">Logstash</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag">技术</a><span class="tag-list-count">6</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/ELK/" style="font-size: 14px;">ELK</a> <a href="/tags/Elasticsearch/" style="font-size: 13.5px;">Elasticsearch</a> <a href="/tags/Logstash/" style="font-size: 13px;">Logstash</a> <a href="/tags/%E6%8A%80%E6%9C%AF/" style="font-size: 14px;">技术</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">三月 2021</a><span class="archive-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/04/08/Elasticsearch-%E6%90%9C%E7%B4%A2%EF%BC%88Search-DSL%EF%BC%89/" class="title">Elasticsearch-映射（Mapping）</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-04-08T03:27:15.000Z" itemprop="datePublished">2021-04-08</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/04/07/Elasticsearch-%E7%B4%A2%E5%BC%95%EF%BC%88Index%EF%BC%89/" class="title">Elasticsearch-索引（Index）</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-04-07T03:27:15.000Z" itemprop="datePublished">2021-04-07</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/04/01/Elasticsearch-%E4%BB%8B%E7%BB%8D/" class="title">Elasticsearch-介绍</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-04-01T03:27:15.000Z" itemprop="datePublished">2021-04-01</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/04/01/Elasticsearch-%E6%98%A0%E5%B0%84%EF%BC%88Mapping%EF%BC%89/" class="title">Elasticsearch-映射（Mapping）</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-04-01T03:27:15.000Z" itemprop="datePublished">2021-04-01</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/22/Logstash-%E9%85%8D%E7%BD%AE/" class="title">Logstash-配置</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-22T03:27:15.000Z" itemprop="datePublished">2021-03-22</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Logstash-配置" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Logstash-配置
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/22/Logstash-%E9%85%8D%E7%BD%AE/" class="article-date">
+	  <time datetime="2021-03-22T03:27:15.000Z" itemprop="datePublished">2021-03-22</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a>►<a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/ELK/" rel="tag">ELK</a>, <a class="article-tag-link-link" href="/tags/Logstash/" rel="tag">Logstash</a>, <a class="article-tag-link-link" href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag">技术</a>
+  </span>
+
+
+        
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2021/03/22/Logstash-%E9%85%8D%E7%BD%AE/" class="leancloud_visitors"  data-flag-title="Logstash-配置">0</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/22/Logstash-%E9%85%8D%E7%BD%AE/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 3.2k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 12(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <blockquote>
+<p>Logstash配置介绍、插件说明、配置说明、高级配置、命令说明<br>基于7.11版本。<br><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/7.11/index.html">https://www.elastic.co/guide/en/logstash/7.11/index.html</a></p>
+</blockquote>
+<span id="more"></span>
+<h2 id="一、配置Logstash"><a href="#一、配置Logstash" class="headerlink" title="一、配置Logstash"></a>一、配置Logstash</h2><p>配置 Logstash，你需要创建一个配置文件来指定想要使用的插件和每个插件的设置。可以引用配置中的事件字段，并在事件满足某些条件时使用条件来处理它们。运行logstash时使用-f指定配置文件。</p>
+<p>每种类型的插件都有一个单独的部分，每个部分都包含一个或多个插件的配置选项。如果指定多个过滤器，则会按照它们在配置文件中出现的顺序进行应用。</p>
+<p>logstash-simple.conf</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">input</span> &#123; <span class="string">stdin</span> &#123; &#125; &#125;</span><br><span class="line"><span class="string">filter</span> &#123;</span><br><span class="line">  <span class="string">grok</span> &#123;</span><br><span class="line">    <span class="string">match</span> <span class="string">=&gt;</span> &#123; <span class="string">&quot;message&quot;</span> <span class="string">=&gt;</span> <span class="string">&quot;<span class="template-variable">%&#123;COMBINEDAPACHELOG&#125;</span>&quot;</span> &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="string">date</span> &#123;</span><br><span class="line">    <span class="string">match</span> <span class="string">=&gt;</span> [ <span class="string">&quot;timestamp&quot;</span> , <span class="string">&quot;dd/MMM/yyyy:HH:mm:ss Z&quot;</span> ]</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="string">output</span> &#123;</span><br><span class="line">  <span class="string">elasticsearch</span> &#123; <span class="string">hosts</span> <span class="string">=&gt;</span> [<span class="string">&quot;localhost:9200&quot;</span>] &#125;</span><br><span class="line">  <span class="string">stdout</span> &#123; <span class="string">codec</span> <span class="string">=&gt;</span> <span class="string">rubydebug</span> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-在配置中访问事件数据和字段"><a href="#1-在配置中访问事件数据和字段" class="headerlink" title="1. 在配置中访问事件数据和字段"></a>1. 在配置中访问事件数据和字段</h3><p>Logstash中的某些配置选项需要使用事件的字段。因为输入会生成事件，所以输入块中没有要评估的字段，因为它们还不存在。</p>
+<h4 id="引用事件数据和字段"><a href="#引用事件数据和字段" class="headerlink" title="引用事件数据和字段"></a>引用事件数据和字段</h4><p>仅在过滤器和输出块内起作用。基本语法是[fieldname]，引用顶级字段时可以去掉[]，引用嵌套字段时，要指定完成整路径[top-level field][nested field]。</p>
+<h4 id="sprintf格式化"><a href="#sprintf格式化" class="headerlink" title="sprintf格式化"></a>sprintf格式化</h4><p>引用事件字段：increment =&gt; “apache.%{[response][status]}”<br>引用事件日期和类型：path =&gt; “/var/log/%{type}.%{+yyyy.MM.dd.HH}”</p>
+<h4 id="条件"><a href="#条件" class="headerlink" title="条件"></a>条件</h4><p>只想在特定条件下过滤或输出事件，这时可以使用条件。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">if EXPRESSION &#123;</span><br><span class="line">  ...</span><br><span class="line">&#125; else if EXPRESSION &#123;</span><br><span class="line">  ...</span><br><span class="line">&#125; else &#123;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>比较运算符:<br>equality: ==, !=, &lt;, &gt;, &lt;=, &gt;=<br>regexp: =<del>, !</del> (checks a pattern on the right against a string value on the left)<br>inclusion: in, not in</li>
+<li>布尔运算符:<br>and, or, nand, xor</li>
+<li>一元运算符：<br>!（取反）</li>
+</ol>
+<p>还可以使用<code>(...)</code>，对表达式进行分组。</p>
+<h4 id="metadata字段"><a href="#metadata字段" class="headerlink" title="@metadata字段"></a>@metadata字段</h4><p>一个特殊的字段，在输出时不会成为任何事件的一部分。非常适用于做条件，扩展和构建事件字段等</p>
+<h2 id="二、插件说明"><a href="#二、插件说明" class="headerlink" title="二、插件说明"></a>二、插件说明</h2><h3 id="Input-plugins"><a href="#Input-plugins" class="headerlink" title="Input plugins"></a>Input plugins</h3><ul>
+<li>beats</li>
+<li>file</li>
+<li>kafka</li>
+</ul>
+<h3 id="Filter-plugins"><a href="#Filter-plugins" class="headerlink" title="Filter plugins"></a>Filter plugins</h3><ul>
+<li><p>aggregate<br>聚合属于同一任务的多个事件（通常是日志行）中的可用信息，最后将聚合的信息推送到最终任务事件中</p>
+</li>
+<li><p>clone<br>克隆事件，原始事件保持不变。新事件作为正常的事件插入到管道中，并从生成事件的过滤器开始继续执行。</p>
+</li>
+<li><p>date<br>解析字段中的日期，然后使用该日期或时间戳作为事件的Logstash的时间戳</p>
+</li>
+<li><p>Grok filter plugin<br>解析任何文本并将其结构化。适用于文本的结构是逐行变化。%{SYNTAX:SEMANTIC}<br><a target="_blank" rel="noopener" href="https://github.com/logstash-plugins/logstash-patterns-core/blob/3cdd3f6c81/patterns/grok-patterns">grok-patterns</a></p>
+</li>
+<li><p>Dissect filter plugin<br>适用于界定符拆分，不使用正则表达式，而且速度非常快。%{id-&gt;} %{function} %{+ts}</p>
+</li>
+</ul>
+<ol>
+<li><code>%&#123;+ts&#125;</code>：表示前面已经捕获到一个ts字段了，而这次捕获的内容，自动添补到之前ts字段内容的后面</li>
+<li><code>-&gt;</code>：表示忽略它右边的填充</li>
+<li><code>%&#123;+key/2&#125;</code>：表示在有多次捕获内容都填到key字段里的时候，拼接字符串的顺序谁前谁后。/2表示排第2位</li>
+<li><code>%&#123;&#125;</code>：表示是一个空的跳过字段</li>
+<li><code>%&#123;?string&#125;</code>：表示这块只是一个占位，并不会实际生成捕获字段存到事件里面</li>
+<li><code>%&#123;?string&#125; %&#123;&amp;string&#125;</code>：表示当同样捕获名称都是string，但是一个?一个&amp;的时候，表示这是一个键值对</li>
+</ol>
+<ul>
+<li><p>drop<br>删除到达此过滤器的所有内容</p>
+</li>
+<li><p>elapsed<br>跟踪一对开始/结束事件，并使用它们的时间戳来计算它们之间的经过时间</p>
+</li>
+<li><p>elasticsearch<br>在Elasticsearch中搜索上一个日志事件，并将其中的某些字段复制到当前事件中</p>
+</li>
+<li><p>fingerprint<br>创建一个或多个字段的一致哈希（指纹），并将结果存储在新字段中</p>
+</li>
+<li><p>geoip<br>根据来自Maxmind GeoLite2数据库的数据添加有关IP地址地理位置的信息</p>
+</li>
+<li><p>http<br>提供了与外部Web服务/ REST API的集成。</p>
+</li>
+<li><p>java_uuid<br>允许您生成UUID并将其作为字段添加到每个已处理事件</p>
+</li>
+<li><p>uuid<br>uuid过滤器允许您生成UUID并将其作为字段添加到每个已处理事件。</p>
+</li>
+<li><p>jdbc_static<br>通过从远程数据库预加载的数据来丰富事件</p>
+</li>
+<li><p>jdbc_streaming<br>执行SQL查询，并将结果集存储在指定为目标的字段中。它会将结果本地缓存到过期的LRU缓存中</p>
+</li>
+<li><p>json<br>这是一个JSON解析过滤器。它采用一个包含JSON的现有字段，并将其扩展为Logstash事件内的实际数据结构</p>
+</li>
+<li><p>kv<br>有助于自动解析foo=bar种类的消息（或特定事件字段）</p>
+</li>
+<li><p>metrics<br>对于汇总指标很有用</p>
+</li>
+<li><p>mutate<br>可以重命名，删除，替换和修改事件中的字段。需要注意的是，一个mutate块中的命令执行是有序的<code>coerce -&gt; ... -&gt; copy</code>，可以使用多个mutate块控制执行顺序。<br>coerce: 设置空字段的默认值<br>replace: 从事件中的其他部分构件一个新值，替换掉已有字段<br>strip: 删除字段的前后空格<br>update: 用新值更新现有字段，该字段不存在不采取任何操作<br>gsub: 正则表达式匹配，将所有的匹配项更新为替换的字符串，只支持字符串和字符串数组，其他类型不采取任何操作<br>join: 用分隔符连接数组，非数组字段不采取任何操作<br>convert: 将字段的值转换为其他类型，如字符串转整数</p>
+</li>
+<li><p>prune<br>用于根据字段名称或其值的白名单或黑名单从事件中删除字段（名称和值也可以是正则表达式）。如果使用json/kv过滤器解析出来一些不是事先知道的字段，只想保留其中一部分，这个功能很有用</p>
+</li>
+<li><p>range<br>用于检查某些字段是否在预期的大小/长度范围内。支持的类型是数字和字符串。当在指定范围内时，执行一个操作。</p>
+</li>
+<li><p>ruby<br>接受嵌入式Ruby代码或Ruby文件</p>
+</li>
+<li><p>sleep<br>睡眠一定时间。这将导致logstash在给定的时间内停止运行。这对于速率限制等很有用</p>
+</li>
+<li><p>throttle<br>节流过滤器用于限制事件数量</p>
+</li>
+<li><p>translate<br>使用配置的哈希或文件确定替换值的常规搜索和替换工具。当前支持的是YAML，JSON和CSV文件。每个字典项目都是一个键值对</p>
+</li>
+<li><p>truncate<br>允许您截断长度超过给定长度的字段</p>
+</li>
+<li><p>urldecode<br>解码经过urlencoded的字段</p>
+</li>
+<li><p>useragent<br>UserAgent过滤器，添加有关用户代理的信息，例如家族，操作系统，版本和设备</p>
+</li>
+<li><p>xml<br>XML过滤器。获取一个包含XML的字段，并将其扩展为实际的数据结构</p>
+</li>
+</ul>
+<h3 id="Output-plugins"><a href="#Output-plugins" class="headerlink" title="Output plugins"></a>Output plugins</h3><ul>
+<li>elasticsearch</li>
+<li>file</li>
+<li>stdout</li>
+<li>exec</li>
+</ul>
+<h2 id="三、配置说明"><a href="#三、配置说明" class="headerlink" title="三、配置说明"></a>三、配置说明</h2><p>包括：logstash.yaml、pipelines.yml、jvm.options、log4j2.properties、startup.options</p>
+<h3 id="logstash-yml"><a href="#logstash-yml" class="headerlink" title="logstash.yml"></a>logstash.yml</h3><blockquote>
+<p>Logstash配置选项可以控制Logstash的执行。如：指定管道设置、配置文件位置、日志记录选项等。运行Logstash时，大多数配置可以命令行中指定，并覆盖文件的相关配置。</p>
+</blockquote>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">node.name:</span> <span class="string">`hostname`</span></span><br><span class="line"><span class="attr">path.data:</span> <span class="string">LOGSTASH_HOME/data</span></span><br><span class="line"><span class="attr">path.logs:</span> <span class="string">LOGSTASH_HOME/logs</span></span><br><span class="line"><span class="comment"># 指定main pipeline的配置文件路径</span></span><br><span class="line"><span class="attr">path.config:</span> </span><br><span class="line"><span class="comment"># 指定main pipeline的配置数据。语法同配置文件</span></span><br><span class="line"><span class="attr">config.string:</span> </span><br><span class="line"><span class="comment"># 开启后，检查配置是否有效，然后退出</span></span><br><span class="line"><span class="attr">config.test_and_exit:</span> <span class="literal">false</span></span><br><span class="line"><span class="comment"># 开启后，修改配置文件自动加载，过程：暂停管道所有输入；创新新管道并检验配置；检查成功切换到新管道，失败则继续使用老的管道。</span></span><br><span class="line"><span class="attr">config.reload.automatic:</span> <span class="literal">false</span></span><br><span class="line"><span class="comment"># 检查配置文件更新的时间间隔</span></span><br><span class="line"><span class="attr">config.reload.interval:</span> <span class="string">3s</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 内部队列模型，memory(default)：内存，persisted：磁盘</span></span><br><span class="line"><span class="attr">queue.type:</span> <span class="string">memory</span></span><br><span class="line"><span class="comment"># 持久队列的数据文件存储路径（queue.type: persisted时启用）</span></span><br><span class="line"><span class="attr">path.queue:</span> <span class="string">path.data/queue</span></span><br><span class="line"><span class="comment"># 持久队列的页容量，持久化以页为单位</span></span><br><span class="line"><span class="attr">queue.page_capacity:</span> <span class="string">64mb</span></span><br><span class="line"><span class="comment"># 开启后，关闭logstash之前等待持久队列消耗完毕</span></span><br><span class="line"><span class="attr">queue.drain:</span> <span class="literal">false</span></span><br><span class="line"><span class="comment"># 队列中允许的最大事件数，默认0表示无限制</span></span><br><span class="line"><span class="attr">queue.max_events:</span> <span class="number">0</span></span><br><span class="line"><span class="comment"># 事件缓冲的内部队列的总容量，达到限制时Logstash将不再接受新事件</span></span><br><span class="line"><span class="attr">queue.max_bytes:</span> <span class="string">1024mb</span></span><br><span class="line"><span class="comment"># 强制执行检查点之前的最大ACKed事件数</span></span><br><span class="line"><span class="attr">queue.checkpoint.acks:</span> <span class="number">1024</span></span><br><span class="line"><span class="comment"># 强制执行检查点之前，可以写入磁盘的最大事件数</span></span><br><span class="line"><span class="attr">queue.checkpoint.writes:</span> <span class="number">1024</span></span><br><span class="line"><span class="comment"># 对每次检查点写入失败将重试一次</span></span><br><span class="line"><span class="attr">queue.checkpoint.retry:</span> <span class="literal">false</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># metrics REST endpoint绑定的地址和端口</span></span><br><span class="line"><span class="attr">http.host:</span> <span class="string">&quot;127.0.0.1&quot;</span></span><br><span class="line"><span class="attr">http.port:</span> <span class="number">9600</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 工作线程ID</span></span><br><span class="line"><span class="attr">pipeline.id:</span> <span class="string">main</span></span><br><span class="line"><span class="comment"># 控制事件排序，auto：如果`pipeline.workers: 1`开启排序。true：如果有多个工作线程，强制对管道进行排序，并防止Logstash启动。false：禁用排序所需的处理，节省处理成本。</span></span><br><span class="line"><span class="attr">pipeline.ordered:</span> <span class="string">auto</span></span><br><span class="line"><span class="comment"># 管道筛选和输出阶段的工作线程数，CPU没有饱和可以增加此数字更好的利用机器处理能力。</span></span><br><span class="line"><span class="attr">pipeline.workers:</span> <span class="string">`number</span> <span class="string">of</span> <span class="string">cpu</span> <span class="string">cores`</span></span><br><span class="line"><span class="comment"># 单个工作线程在发送到filters+workers之前，从输入中获取的最大事件数</span></span><br><span class="line"><span class="attr">pipeline.batch.size:</span> <span class="number">125</span></span><br><span class="line"><span class="comment"># 将小批量事件派送到filters+outputs之前，轮询下一个事件等待毫秒时间，可以理解为未到达批处理最大事件数时延迟发送时间</span></span><br><span class="line"><span class="attr">pipeline.batch.delay:</span> <span class="number">50</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 开启后，每个pipeline分割为不同的日志，使用pipeline.id作为文件名</span></span><br><span class="line"><span class="attr">pipeline.separate_logs:</span> <span class="literal">false</span></span><br><span class="line"><span class="comment"># 开启后，强行退出可能会导致关机期间丢失数据</span></span><br><span class="line"><span class="attr">pipeline.unsafe_shutdown:</span> <span class="literal">false</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 启用死信队列，默认false</span></span><br><span class="line"><span class="attr">dead_letter_queue.enable:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">dead_letter_queue.max_bytes:</span> <span class="string">1024mb</span></span><br><span class="line"><span class="attr">path.dead_letter_queue:</span> <span class="string">path.data/dead_letter_queue</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 指定自定义插件的位置</span></span><br><span class="line"><span class="attr">path.plugins:</span> </span><br><span class="line"><span class="comment"># 配置模块，遵循yaml结构</span></span><br><span class="line"><span class="attr">modules:</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="四、高级配置"><a href="#四、高级配置" class="headerlink" title="四、高级配置"></a>四、高级配置</h2><h3 id="1-多管道配置（multiple-pipelines-configuration）"><a href="#1-多管道配置（multiple-pipelines-configuration）" class="headerlink" title="1. 多管道配置（multiple pipelines configuration）"></a>1. 多管道配置（multiple pipelines configuration）</h3><p>如果需要在同一个进程中运行多个管道，通过配置pipelines.yml文件来处理，必须放在path.settings文件夹中。并遵循以下结构：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># config/pipelines.yml</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">pipeline.id:</span> <span class="string">my-pipeline_1</span></span><br><span class="line">  <span class="attr">path.config:</span> <span class="string">&quot;/etc/path/to/p1.config&quot;</span></span><br><span class="line">  <span class="attr">pipeline.workers:</span> <span class="number">3</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">pipeline.id:</span> <span class="string">my-other-pipeline</span></span><br><span class="line">  <span class="attr">path.config:</span> <span class="string">&quot;/etc/different/path/p2.cfg&quot;</span></span><br><span class="line">  <span class="attr">queue.type:</span> <span class="string">persisted</span></span><br></pre></td></tr></table></figure>
+
+<p>不带任何参数启动Logstash时，将读取pipelines.yml文件并实例化该文件中指定的所有管道。如果使用-e或-f时，Logstash会忽略pipelines.yml文件并记录相关警告。</p>
+<ul>
+<li>如果当前的配置中的事件流不共享相同的输入/过滤器和输出，并且使用标签和条件相互分隔，则使用多个管道特别有用。</li>
+<li>在单个实例中具有多个管道还可以使这些事件流具有不同的性能和持久性参数（例如，工作线程数和持久队列的不同设置）。</li>
+</ul>
+<h3 id="2-管道到管道的通信（pipeline-to-pipeline-Communication）"><a href="#2-管道到管道的通信（pipeline-to-pipeline-Communication）" class="headerlink" title="2. 管道到管道的通信（pipeline-to-pipeline Communication）"></a>2. 管道到管道的通信（pipeline-to-pipeline Communication）</h3><p>使用Logstash的多管道功能时，可以在同一Logstash实例中连接多个管道。此配置对于隔离这些管道的执行以及有助于打破复杂管道的逻辑很有用。</p>
+<h3 id="3-重新加载配置文件（Reloading-the-Config-File）"><a href="#3-重新加载配置文件（Reloading-the-Config-File）" class="headerlink" title="3. 重新加载配置文件（Reloading the Config File）"></a>3. 重新加载配置文件（Reloading the Config File）</h3><p>如果没有开启自动重新加载（–config.reload.automatic），可以强制Logstash重新加载配置文件并重新启动管道。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kill -SIGHUP 14175</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-管理多行事件（Managing-Multiline-Events）"><a href="#4-管理多行事件（Managing-Multiline-Events）" class="headerlink" title="4. 管理多行事件（Managing Multiline Events）"></a>4. 管理多行事件（Managing Multiline Events）</h3><h3 id="5-Glob模式支持（glob-pattern-support）"><a href="#5-Glob模式支持（glob-pattern-support）" class="headerlink" title="5. Glob模式支持（glob pattern support）"></a>5. Glob模式支持（glob pattern support）</h3><p>注意Logstash不会按照glob表达式中编写的文件顺序执行，是按照字母顺序对其进行排序执行的。</p>
+<h3 id="6-Logstash到Logstash通讯（Logstash-to-Logstash-Communication）"><a href="#6-Logstash到Logstash通讯（Logstash-to-Logstash-Communication）" class="headerlink" title="6. Logstash到Logstash通讯（Logstash-to-Logstash Communication）"></a>6. Logstash到Logstash通讯（Logstash-to-Logstash Communication）</h3><h3 id="7-Ingest-Node解析数据转换到Logstash解析数据（Converting-Ingest-Node-Pipelines）"><a href="#7-Ingest-Node解析数据转换到Logstash解析数据（Converting-Ingest-Node-Pipelines）" class="headerlink" title="7. Ingest Node解析数据转换到Logstash解析数据（Converting Ingest Node Pipelines）"></a>7. Ingest Node解析数据转换到Logstash解析数据（Converting Ingest Node Pipelines）</h3><h3 id="8-集中配置管理（Centralized-Pipeline-Management）"><a href="#8-集中配置管理（Centralized-Pipeline-Management）" class="headerlink" title="8. 集中配置管理（Centralized Pipeline Management）"></a>8. 集中配置管理（Centralized Pipeline Management）</h3><h2 id="五、命令说明"><a href="#五、命令说明" class="headerlink" title="五、命令说明"></a>五、命令说明</h2><p>命令行上设置的所有参数都会覆盖logstash.yml中的相应设置。生产环境建议使用logstash.yml控制Logstash执行。</p>
+<p>参数：</p>
+<ul>
+<li>–node.name NAME：指定Logstash实例的名称，默认当前主机名</li>
+<li>-f, –path.config CONFIG_PATH：加载Logstash配置的文件或目录</li>
+<li>-e, –config.string CONFIG_STRING：Logstash配置数据，如果未指定输入，则使用<code>input &#123; stdin &#123; type =&gt; stdin &#125; &#125;</code>作为默认的输入，如果未指定输出，则使用<code>output &#123; stdout &#123; codec =&gt; rubydebug &#125; &#125;</code>作为默认的输出。</li>
+<li>-M “CONFIG_SETTING=VALUE”：覆盖指定的配置</li>
+<li>–config.test_and_exit: 检查配置是否有效，然后退出</li>
+<li>–config.reload.automatic: 修改配置文件自动加载</li>
+<li>–modules MODULE_NAME：指定运行的模块名称</li>
+<li>–setup：是一次性设置步骤，在Elasticsearch中创建索引模式并导入Kibana仪表板和可视化文件。</li>
+<li>…</li>
+</ul>
+<p>示例：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin/logstash -f logstash-simple.conf --config.reload.automatic</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.lights8080.xyz/2021/03/22/Logstash-%E9%85%8D%E7%BD%AE/" title="Logstash-配置" target="_blank" rel="external">http://www.lights8080.xyz/2021/03/22/Logstash-%E9%85%8D%E7%BD%AE/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/lights8080" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/lights8080" target="_blank"><span class="text-dark">七路灯</span><small class="ml-1x">从事互联网开发，信奉终身成长的技术人</small></a></h3>
+        <div>人的一生应当有许多停靠站，我但愿每一个站台都有一盏雾中的灯。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="vcomments"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/04/01/Elasticsearch-%E6%98%A0%E5%B0%84%EF%BC%88Mapping%EF%BC%89/" title="Elasticsearch-映射（Mapping）"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/03/19/Logstash-%E4%BB%8B%E7%BB%8D/" title="Logstash-介绍"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo, wechat" data-mobile-sites="weibo, wechat"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lights8080" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="https://www.zhihu.com/people/lights8080" target="_blank" title="Zhihu" data-toggle=tooltip data-placement=top><i class="icon icon-zhihu"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+
+
+<!-- custom analytics part create by xiamo -->
+<script defer src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+<script defer>
+AV.init({
+  appId: '0A4Cg4vm7SmX0sfL9lfvExSq-gzGzoHsz',
+  appKey: 'jkuwap2Fh3CKBlP1SO59uyb4'
+});
+
+function showTime(Counter) {
+	var query = new AV.Query(Counter);
+		var visitors= $('.leancloud_visitors');
+		query.greaterThanOrEqualTo("time", 0);		
+		query.find({
+			success: function(results) {
+				if (results.length == 0) {				
+					return;
+				}
+				var data = results;
+				visitors.each(function(){
+					var url = $(this).attr('id').trim();					
+					for (var i = 0; i < data.length; i++) {
+						var object = data[i];
+						var content = object.get('time');
+						var _url = object.get('url')
+						if(url == _url){
+							$(this).text(content);
+						}
+					}
+				})
+				
+			},
+			error: function(object, error) {
+				console.log("Error: " + error.code + " " + error.message);
+			}
+		});
+}
+
+function addCount(Counter) {
+	var Counter = AV.Object.extend("Counter");
+	url = $(".leancloud_visitors").attr('id').trim();
+	title = $(".leancloud_visitors").attr('data-flag-title').trim();
+	var query = new AV.Query(Counter);
+	query.equalTo("url", url);
+	query.find({
+		success: function(results) {
+			if (results.length > 0) {
+				var counter = results[0];
+				counter.fetchWhenSave(true);
+				counter.increment("time");
+				counter.save(null, {
+					success: function(counter) {
+						var content = counter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(counter, error) {
+						console.log('Failed to save Visitor num, with error message: ' + error.message);
+					}
+				});
+			} else {
+				var newcounter = new Counter();
+				newcounter.set("title", title);
+				newcounter.set("url", url);
+				newcounter.set("time", 1);
+				newcounter.save(null, {
+					success: function(newcounter) {
+					    console.log("newcounter.get('time')="+newcounter.get('time'));
+						var content = newcounter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(newcounter, error) {
+						console.log('Failed to create');
+					}
+				});
+			}
+		},
+		error: function(error) {
+			console.log('Error:' + error.code + " " + error.message);
+		}
+	});
+}
+$(function() {
+	var Counter = AV.Object.extend("Counter");
+	if ($('.leancloud_visitors').length == 1) {
+		addCount(Counter);
+	} else {
+		showTime(Counter);
+	}
+}); 
+</script>
+
+
+
+   
+    
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/valine"></script>
+  <script type="text/javascript">
+  var GUEST = ['nick', 'mail', 'link'];
+  var meta = 'nick,mail,link';
+  meta = meta.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#vcomments',
+    verify: false,
+    notify: false,
+    appId: '0A4Cg4vm7SmX0sfL9lfvExSq-gzGzoHsz',
+    appKey: 'jkuwap2Fh3CKBlP1SO59uyb4',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: meta,
+    pageSize: '10' || 10,
+    visitor: false
+  });
+  </script>
+
+     
+
+
+
+
+
+
+
+</body>
+</html>
