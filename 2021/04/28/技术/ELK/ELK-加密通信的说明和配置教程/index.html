@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>ELK-加密通信的说明和配置教程 | 七路灯</title>
+  <meta name="description" content="介绍Elasticsearch节点之间的加密通信、浏览器与Kibana之间的加密通信、Kibana与Elasticsearch之间的加密通信、操作步骤和配置说明。基于7.11。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ELK-加密通信的说明和配置教程">
+<meta property="og:url" content="http://www.lights8080.com/2021/04/28/%E6%8A%80%E6%9C%AF/ELK/ELK-%E5%8A%A0%E5%AF%86%E9%80%9A%E4%BF%A1%E7%9A%84%E8%AF%B4%E6%98%8E%E5%92%8C%E9%85%8D%E7%BD%AE%E6%95%99%E7%A8%8B/index.html">
+<meta property="og:site_name" content="七路灯">
+<meta property="og:description" content="介绍Elasticsearch节点之间的加密通信、浏览器与Kibana之间的加密通信、Kibana与Elasticsearch之间的加密通信、操作步骤和配置说明。基于7.11。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-04-28T03:27:15.000Z">
+<meta property="article:modified_time" content="2021-06-01T10:47:46.000Z">
+<meta property="article:author" content="七路灯">
+<meta property="article:tag" content="技术">
+<meta property="article:tag" content="ELK">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.lights8080.com/2021/04/28/%E6%8A%80%E6%9C%AF/ELK/ELK-%E5%8A%A0%E5%AF%86%E9%80%9A%E4%BF%A1%E7%9A%84%E8%AF%B4%E6%98%8E%E5%92%8C%E9%85%8D%E7%BD%AE%E6%95%99%E7%A8%8B/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="七路灯" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="../images/favicon.ico" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="http://www.lights8080.com" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">七路灯</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">从事互联网开发，信奉终身成长的技术人</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Beijing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lights8080" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="https://www.zhihu.com/people/lights8080" target="_blank" title="Zhihu" data-toggle=tooltip data-placement=top><i class="icon icon-zhihu"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎关注公众号共同交流学习!</p>
+            </div>
+            <div class="content">
+                <img src="/../images/gongzhonghao-qrcode.jpg" alt="site.qrcode_alt" title="site.qrcode_title" />
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/">人体系统</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><span class="category-list-count">19</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a><span class="category-list-count">14</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/JVM/">JVM</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/Linux/">Linux</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/SpringCloud/">SpringCloud</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%AF%AD%E5%BD%95/">语录</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/ELK/" rel="tag">ELK</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Elasticsearch/" rel="tag">Elasticsearch</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Filebeat/" rel="tag">Filebeat</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/" rel="tag">JVM</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Kibana/" rel="tag">Kibana</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Logstash/" rel="tag">Logstash</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Cloud-Gateway/" rel="tag">Spring Cloud Gateway</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SpringCloud/" rel="tag">SpringCloud</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/" rel="tag">人体系统</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag">技术</a><span class="tag-list-count">19</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%9D%8E%E6%B0%B8%E4%B9%90%E8%80%81%E5%B8%88/" rel="tag">李永乐老师</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AF%AD%E5%BD%95/" rel="tag">语录</a><span class="tag-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/ELK/" style="font-size: 13.8px;">ELK</a> <a href="/tags/Elasticsearch/" style="font-size: 13.6px;">Elasticsearch</a> <a href="/tags/Filebeat/" style="font-size: 13.2px;">Filebeat</a> <a href="/tags/JVM/" style="font-size: 13.2px;">JVM</a> <a href="/tags/Kibana/" style="font-size: 13px;">Kibana</a> <a href="/tags/Linux/" style="font-size: 13.2px;">Linux</a> <a href="/tags/Logstash/" style="font-size: 13.2px;">Logstash</a> <a href="/tags/Spring-Cloud-Gateway/" style="font-size: 13px;">Spring Cloud Gateway</a> <a href="/tags/SpringCloud/" style="font-size: 13px;">SpringCloud</a> <a href="/tags/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/" style="font-size: 13px;">人体系统</a> <a href="/tags/%E6%8A%80%E6%9C%AF/" style="font-size: 14px;">技术</a> <a href="/tags/%E6%9D%8E%E6%B0%B8%E4%B9%90%E8%80%81%E5%B8%88/" style="font-size: 13px;">李永乐老师</a> <a href="/tags/%E8%AF%AD%E5%BD%95/" style="font-size: 13.4px;">语录</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">12</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">三月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/06/02/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/%E8%9B%8B%E7%99%BD%E8%B4%A8/" class="title">(no title)</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-06-02T07:36:12.000Z" itemprop="datePublished">2021-06-02</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/">人体系统</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/06/02/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F-%E7%B3%96/" class="title">人体系统-糖</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-06-01T16:00:00.000Z" itemprop="datePublished">2021-06-02</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/Linux/">Linux</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/05/19/%E6%8A%80%E6%9C%AF/Linux/Linux%20%5Bbuffcache%5D%E5%86%85%E5%AD%98%E7%BC%93%E5%AD%98%E5%8D%A0%E7%94%A8%E8%BF%87%E9%AB%98%E5%88%86%E6%9E%90%E5%92%8C%E4%BC%98%E5%8C%96/" class="title">Linux [buff/cache]内存缓存占用过高分析和优化</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-05-18T16:00:00.000Z" itemprop="datePublished">2021-05-19</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/Linux/">Linux</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/05/19/%E6%8A%80%E6%9C%AF/Linux/OOM%20killer%E5%8F%8AOvercommit/" class="title">OOM killer及Overcommit</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-05-18T16:00:00.000Z" itemprop="datePublished">2021-05-19</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/SpringCloud/">SpringCloud</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/05/19/%E6%8A%80%E6%9C%AF/SpringCloud/Spring%20Cloud%20Gateway%E4%B8%8E%E5%90%8E%E7%AB%AF%E6%9C%8D%E5%8A%A1%E9%97%AE%E9%A2%98%E5%A4%84%E7%90%86%E6%80%BB%E7%BB%93/" class="title">Spring Cloud Gateway与后端服务问题处理总结</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-05-18T16:00:00.000Z" itemprop="datePublished">2021-05-19</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-技术/ELK/ELK-加密通信的说明和配置教程" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      ELK-加密通信的说明和配置教程
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/04/28/%E6%8A%80%E6%9C%AF/ELK/ELK-%E5%8A%A0%E5%AF%86%E9%80%9A%E4%BF%A1%E7%9A%84%E8%AF%B4%E6%98%8E%E5%92%8C%E9%85%8D%E7%BD%AE%E6%95%99%E7%A8%8B/" class="article-date">
+	  <time datetime="2021-04-28T03:27:15.000Z" itemprop="datePublished">2021-04-28</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a>►<a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/ELK/" rel="tag">ELK</a>, <a class="article-tag-link-link" href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag">技术</a>
+  </span>
+
+
+        
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2021/04/28/%E6%8A%80%E6%9C%AF/ELK/ELK-%E5%8A%A0%E5%AF%86%E9%80%9A%E4%BF%A1%E7%9A%84%E8%AF%B4%E6%98%8E%E5%92%8C%E9%85%8D%E7%BD%AE%E6%95%99%E7%A8%8B/" class="leancloud_visitors"  data-flag-title="ELK-加密通信的说明和配置教程">
+			<span class="leancloud-visitors-count">0</span>
+		</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/04/28/%E6%8A%80%E6%9C%AF/ELK/ELK-%E5%8A%A0%E5%AF%86%E9%80%9A%E4%BF%A1%E7%9A%84%E8%AF%B4%E6%98%8E%E5%92%8C%E9%85%8D%E7%BD%AE%E6%95%99%E7%A8%8B/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 1.1k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 5(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <blockquote>
+<p>介绍Elasticsearch节点之间的加密通信、浏览器与Kibana之间的加密通信、Kibana与Elasticsearch之间的加密通信、操作步骤和配置说明。<br>基于7.11。</p>
+</blockquote>
+<span id="more"></span>
+
+<h2 id="1-Elasticsearch加密通信"><a href="#1-Elasticsearch加密通信" class="headerlink" title="1 Elasticsearch加密通信"></a>1 Elasticsearch加密通信</h2><p>Elastic Stack安全特性能够加密加密往返于Elasticsearch集群以及从其内部的通信。使用传输层安全性(TLS/SSL)保护连接的安全。<br>未启用加密的群集将以纯文本格式（包括密码）发送所有数据。如果启用了Elasticsearch安全功能，除非您具有试用许可证，否则必须配置SSL/TLS进行节点间通信。</p>
+<h3 id="1-1-Elasticsearch节点之间的加密通信"><a href="#1-1-Elasticsearch节点之间的加密通信" class="headerlink" title="1.1 Elasticsearch节点之间的加密通信"></a>1.1 Elasticsearch节点之间的加密通信</h3><p><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/7.11/configuring-tls.html#tls-transport">https://www.elastic.co/guide/en/elasticsearch/reference/7.11/configuring-tls.html#tls-transport</a></p>
+<ul>
+<li>Verify that the xpack.security.enabled setting is true.（启用安全功能）</li>
+<li>Generate a private key and X.509 certificate.（生成私钥和X.509证书）</li>
+<li>Configure each node to:<ul>
+<li>Required: Enable TLS on the transport layer.（传输层启用TLS）</li>
+<li>Recommended: Enable TLS on the HTTP layer.（HTTP层启用TLS）</li>
+</ul>
+</li>
+</ul>
+<h3 id="1-2-HTTP客户端的加密通信"><a href="#1-2-HTTP客户端的加密通信" class="headerlink" title="1.2 HTTP客户端的加密通信"></a>1.2 HTTP客户端的加密通信</h3><p><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/7.11/configuring-tls.html#tls-http">https://www.elastic.co/guide/en/elasticsearch/reference/7.11/configuring-tls.html#tls-http</a></p>
+<ul>
+<li>Generate node certificates.（生成节点证书）</li>
+<li>Enable TLS and specify the information required to access the node’s certificate.（启用TLS并指定节点证书）</li>
+<li>Restart Elasticsearch.（重启Elasticsearch）</li>
+</ul>
+<h2 id="2-Kibana通信加密"><a href="#2-Kibana通信加密" class="headerlink" title="2 Kibana通信加密"></a>2 Kibana通信加密</h2><p>传输层安全安全协议(SSL)和传输层安全协议(TLS)为数据传输提供加密。虽然这些术语通常可以互换使用，但 Kibana 只支持 TLS，它取代了旧的 SSL 协议。<br>浏览器将流量发送到 Kibana，Kibana 将流量发送到 Elasticsearch，这些通信通道分别配置为使用 TLS。</p>
+<h3 id="2-1-浏览器与Kibana之间的加密通信"><a href="#2-1-浏览器与Kibana之间的加密通信" class="headerlink" title="2.1 浏览器与Kibana之间的加密通信"></a>2.1 浏览器与Kibana之间的加密通信</h3><p><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/kibana/7.11/configuring-tls.html#configuring-tls-browser-kib">https://www.elastic.co/guide/en/kibana/7.11/configuring-tls.html#configuring-tls-browser-kib</a></p>
+<ol>
+<li>获得 Kibana 的服务器证书和私钥</li>
+<li>配置 Kibana 以访问服务器证书和私钥</li>
+<li>将 Kibana 配置为为入站连接启用 TLS</li>
+<li>重启 Kibana</li>
+</ol>
+<h3 id="2-2-Kibana与Elasticsearch之间的加密通信"><a href="#2-2-Kibana与Elasticsearch之间的加密通信" class="headerlink" title="2.2 Kibana与Elasticsearch之间的加密通信"></a>2.2 Kibana与Elasticsearch之间的加密通信</h3><p><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/kibana/7.11/configuring-tls.html#configuring-tls-kib-es">https://www.elastic.co/guide/en/kibana/7.11/configuring-tls.html#configuring-tls-kib-es</a></p>
+<ul>
+<li>Enable TLS on the HTTP layer in Elasticsearch.（在Elasticsearch的HTTP层上启动TLS）</li>
+<li>Obtain the certificate authority (CA) certificate chain for Elasticsearch.（获取Elasticsearch的证书颁发机构(CA)证书链）<ul>
+<li>used the elasticsearch-certutil http command,include the CA certificate chain in PEM format.（使用elasticsearch-certutil http命令生成CA证书链）</li>
+<li>extract the CA certificate.（通过PKCS#12文件提取CA证书链）</li>
+</ul>
+</li>
+<li>Configure Kibana to trust the Elasticsearch CA certificate chain for the HTTP layer.（配置Kibana以信任HTTP层的Elasticsearch CA证书链）</li>
+<li>Configure Kibana to enable TLS for outbound connections to Elasticsearch.（配置Kibana与Elasticsearch的连接启用TLS）</li>
+</ul>
+<h2 id="3-操作步骤"><a href="#3-操作步骤" class="headerlink" title="3 操作步骤"></a>3 操作步骤</h2><ol>
+<li><p>操作命令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 进入Elasticsearch目录</span></span><br><span class="line">cd /data/elk/elasticsearch-7.11.2</span><br><span class="line"><span class="meta">#</span><span class="bash"> 创建证书颁发机构：获得文件：elastic-stack-ca.p12</span></span><br><span class="line">./bin/elasticsearch-certutil ca</span><br><span class="line"><span class="meta">#</span><span class="bash"> 为每个节点生成证书和私钥，获得文件：elastic-certificates.p12</span></span><br><span class="line">./bin/elasticsearch-certutil cert --ca elastic-stack-ca.p12</span><br><span class="line"><span class="meta">#</span><span class="bash"> 生成专门用于加密HTTP客户端通信的证书，获得文件：elasticsearch-ssl-http.zip</span></span><br><span class="line">./bin/elasticsearch-certutil http</span><br><span class="line"><span class="meta">#</span><span class="bash"> 解压HTTP通信证书，获得文件：elasticsearch/http.p12和kibana/elasticsearch-ca.pem</span></span><br><span class="line">unzip elasticsearch-ssl-http.zip</span><br><span class="line"><span class="meta">#</span><span class="bash"> 在每个Elasticsearch节点的配置目录中创建一个文件夹certs，放置安全证书</span></span><br><span class="line">mkdir /data/elk/elasticsearch-7.11.2/config/certs</span><br><span class="line">cp elastic-certificates.p12 config/certs</span><br><span class="line">cp elasticsearch/http.p12 config/certs</span><br><span class="line"><span class="meta">#</span><span class="bash"> 复制HTTP通信证书到Kibana配置目录</span></span><br><span class="line">cp kibana/elasticsearch-ca.pem /data/elk/kibana-7.11.2/config</span><br></pre></td></tr></table></figure></li>
+<li><p>生成加密HTTP客户端通信证书说明（./bin/elasticsearch-certutil http）<br>参考：<a target="_blank" rel="noopener" href="https://lights8080.github.io/post/es-an-quan-security">https://lights8080.github.io/post/es-an-quan-security</a></p>
+</li>
+</ol>
+<h2 id="4-参数配置"><a href="#4-参数配置" class="headerlink" title="4 参数配置"></a>4 参数配置</h2><ol>
+<li><p>Elasticsearch<br>elasticsearch-7.11.2/config/elasticsearch.yml</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在节点上启用Elasticsearch安全功能</span></span><br><span class="line"><span class="attr">xpack.security.enabled:</span> <span class="literal">true</span></span><br><span class="line"><span class="comment"># 节点间加密通信配置</span></span><br><span class="line"><span class="attr">xpack.security.transport.ssl.enabled:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">xpack.security.transport.ssl.verification_mode:</span> <span class="string">certificate</span> </span><br><span class="line"><span class="attr">xpack.security.transport.ssl.keystore.path:</span> <span class="string">elastic-certificates.p12</span> </span><br><span class="line"><span class="attr">xpack.security.transport.ssl.truststore.path:</span> <span class="string">elastic-certificates.p12</span> </span><br><span class="line"><span class="comment"># HTTP加密通信配置</span></span><br><span class="line"><span class="attr">xpack.security.http.ssl.enabled:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">xpack.security.http.ssl.keystore.path:</span> <span class="string">&quot;certs/http.p12&quot;</span></span><br></pre></td></tr></table></figure></li>
+<li><p>Kibana<br>kibana-7.11.2/config/kibana.yml</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 配置Kibana与Elasticsearch的连接启用TLS</span></span><br><span class="line"><span class="attr">elasticsearch.hosts:</span> [<span class="string">&quot;https://127.0.0.1:9200&quot;</span>]</span><br><span class="line"><span class="comment"># 配置信任HTTP层的Elasticsearch CA证书链</span></span><br><span class="line"><span class="attr">elasticsearch.ssl.certificateAuthorities:</span> [<span class="string">&quot;/data/elk/kibana-7.11.2/config/elasticsearch-ca.pem&quot;</span>]</span><br></pre></td></tr></table></figure></li>
+<li><p>Logstash<br>logstash-7.11.2/config/logstash-sample.conf</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">output &#123;</span><br><span class="line">    elasticsearch &#123;</span><br><span class="line">            hosts =&gt; [&quot;https://127.0.0.1:9200&quot;]</span><br><span class="line">            user =&gt; &quot;elastic&quot;</span><br><span class="line">            password =&gt; &quot;xxxxxx&quot;</span><br><span class="line">            cacert =&gt; &quot;/data/elk/elasticsearch-7.11.2/config/certs/elasticsearch-ca.pem&quot;</span><br><span class="line">     &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>Metricbeat<br>metricbeat-7.11.2/modules.d/elasticsearch-xpack.yml</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">- module: elasticsearch</span><br><span class="line">  xpack.enabled: true</span><br><span class="line">  period: 10s</span><br><span class="line">  hosts: [&quot;https://127.0.0.1:9200&quot;]</span><br><span class="line">  username: &quot;elastic&quot;</span><br><span class="line">  password: &quot;xxxxxx&quot;</span><br><span class="line">  ssl.certificate_authorities: [&quot;/data/elk/elasticsearch-7.11.2/config/certs/elasticsearch-ca.pem&quot;]</span><br></pre></td></tr></table></figure></li>
+<li><p>其他Elastic产品使用加密通信<br>略</p>
+</li>
+</ol>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.lights8080.com/2021/04/28/%E6%8A%80%E6%9C%AF/ELK/ELK-%E5%8A%A0%E5%AF%86%E9%80%9A%E4%BF%A1%E7%9A%84%E8%AF%B4%E6%98%8E%E5%92%8C%E9%85%8D%E7%BD%AE%E6%95%99%E7%A8%8B/" title="ELK-加密通信的说明和配置教程" target="_blank" rel="external">http://www.lights8080.com/2021/04/28/%E6%8A%80%E6%9C%AF/ELK/ELK-%E5%8A%A0%E5%AF%86%E9%80%9A%E4%BF%A1%E7%9A%84%E8%AF%B4%E6%98%8E%E5%92%8C%E9%85%8D%E7%BD%AE%E6%95%99%E7%A8%8B/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="http://www.lights8080.com" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="http://www.lights8080.com" target="_blank"><span class="text-dark">七路灯</span><small class="ml-1x">从事互联网开发，信奉终身成长的技术人</small></a></h3>
+        <div>人的一生应当有许多停靠站，我但愿每一个站台都有一盏雾中的灯。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="vcomments"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/04/28/%E6%8A%80%E6%9C%AF/ELK/Beats-Filebeat%E4%BB%8B%E7%BB%8D/" title="Beats-Filebeat介绍"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/04/27/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E5%AE%89%E5%85%A8%E7%89%B9%E6%80%A7%EF%BC%88Security%EF%BC%89/" title="Elasticsearch-安全特性（Security）"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo, wechat" data-mobile-sites="weibo, wechat"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lights8080" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="https://www.zhihu.com/people/lights8080" target="_blank" title="Zhihu" data-toggle=tooltip data-placement=top><i class="icon icon-zhihu"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	<!-- Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>. -->
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+
+
+
+
+   
+    
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/valine"></script>
+  <script type="text/javascript">
+  var GUEST = ['nick', 'mail', 'link'];
+  var meta = 'nick,mail,link';
+  meta = meta.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#vcomments',
+    verify: false,
+    notify: false,
+    appId: '0A4Cg4vm7SmX0sfL9lfvExSq-gzGzoHsz',
+    appKey: 'jkuwap2Fh3CKBlP1SO59uyb4',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: meta,
+    pageSize: '10' || 10,
+    visitor: true
+  });
+  </script>
+
+     
+
+
+
+
+
+
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?cd4db68d2be51fc8c3853594dc53d075";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+</body>
+</html>

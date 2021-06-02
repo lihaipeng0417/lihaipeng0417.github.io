@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Beats-Filebeat命令&amp;配置说明 | 七路灯</title>
+  <meta name="description" content="介绍Filebeat命令、配置以及最佳实战。 基于7.11版本。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Beats-Filebeat命令&amp;配置说明">
+<meta property="og:url" content="http://www.lights8080.com/2021/04/29/%E6%8A%80%E6%9C%AF/ELK/Beats-Filebeat%E5%91%BD%E4%BB%A4&%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E/index.html">
+<meta property="og:site_name" content="七路灯">
+<meta property="og:description" content="介绍Filebeat命令、配置以及最佳实战。 基于7.11版本。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-04-29T03:27:15.000Z">
+<meta property="article:modified_time" content="2021-06-01T10:47:46.000Z">
+<meta property="article:author" content="七路灯">
+<meta property="article:tag" content="技术">
+<meta property="article:tag" content="ELK">
+<meta property="article:tag" content="Filebeat">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.lights8080.com/2021/04/29/%E6%8A%80%E6%9C%AF/ELK/Beats-Filebeat%E5%91%BD%E4%BB%A4&%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="七路灯" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="../images/favicon.ico" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="http://www.lights8080.com" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">七路灯</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">从事互联网开发，信奉终身成长的技术人</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Beijing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lights8080" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="https://www.zhihu.com/people/lights8080" target="_blank" title="Zhihu" data-toggle=tooltip data-placement=top><i class="icon icon-zhihu"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎关注公众号共同交流学习!</p>
+            </div>
+            <div class="content">
+                <img src="/../images/gongzhonghao-qrcode.jpg" alt="site.qrcode_alt" title="site.qrcode_title" />
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/">人体系统</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><span class="category-list-count">19</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a><span class="category-list-count">14</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/JVM/">JVM</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/Linux/">Linux</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/SpringCloud/">SpringCloud</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%AF%AD%E5%BD%95/">语录</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/ELK/" rel="tag">ELK</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Elasticsearch/" rel="tag">Elasticsearch</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Filebeat/" rel="tag">Filebeat</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/" rel="tag">JVM</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Kibana/" rel="tag">Kibana</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Logstash/" rel="tag">Logstash</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Cloud-Gateway/" rel="tag">Spring Cloud Gateway</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SpringCloud/" rel="tag">SpringCloud</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/" rel="tag">人体系统</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag">技术</a><span class="tag-list-count">19</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%9D%8E%E6%B0%B8%E4%B9%90%E8%80%81%E5%B8%88/" rel="tag">李永乐老师</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AF%AD%E5%BD%95/" rel="tag">语录</a><span class="tag-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/ELK/" style="font-size: 13.8px;">ELK</a> <a href="/tags/Elasticsearch/" style="font-size: 13.6px;">Elasticsearch</a> <a href="/tags/Filebeat/" style="font-size: 13.2px;">Filebeat</a> <a href="/tags/JVM/" style="font-size: 13.2px;">JVM</a> <a href="/tags/Kibana/" style="font-size: 13px;">Kibana</a> <a href="/tags/Linux/" style="font-size: 13.2px;">Linux</a> <a href="/tags/Logstash/" style="font-size: 13.2px;">Logstash</a> <a href="/tags/Spring-Cloud-Gateway/" style="font-size: 13px;">Spring Cloud Gateway</a> <a href="/tags/SpringCloud/" style="font-size: 13px;">SpringCloud</a> <a href="/tags/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/" style="font-size: 13px;">人体系统</a> <a href="/tags/%E6%8A%80%E6%9C%AF/" style="font-size: 14px;">技术</a> <a href="/tags/%E6%9D%8E%E6%B0%B8%E4%B9%90%E8%80%81%E5%B8%88/" style="font-size: 13px;">李永乐老师</a> <a href="/tags/%E8%AF%AD%E5%BD%95/" style="font-size: 13.4px;">语录</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">12</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">三月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/06/02/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/%E8%9B%8B%E7%99%BD%E8%B4%A8/" class="title">(no title)</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-06-02T07:36:12.000Z" itemprop="datePublished">2021-06-02</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/">人体系统</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/06/02/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F-%E7%B3%96/" class="title">人体系统-糖</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-06-01T16:00:00.000Z" itemprop="datePublished">2021-06-02</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/Linux/">Linux</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/05/19/%E6%8A%80%E6%9C%AF/Linux/Linux%20%5Bbuffcache%5D%E5%86%85%E5%AD%98%E7%BC%93%E5%AD%98%E5%8D%A0%E7%94%A8%E8%BF%87%E9%AB%98%E5%88%86%E6%9E%90%E5%92%8C%E4%BC%98%E5%8C%96/" class="title">Linux [buff/cache]内存缓存占用过高分析和优化</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-05-18T16:00:00.000Z" itemprop="datePublished">2021-05-19</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/Linux/">Linux</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/05/19/%E6%8A%80%E6%9C%AF/Linux/OOM%20killer%E5%8F%8AOvercommit/" class="title">OOM killer及Overcommit</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-05-18T16:00:00.000Z" itemprop="datePublished">2021-05-19</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/SpringCloud/">SpringCloud</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/05/19/%E6%8A%80%E6%9C%AF/SpringCloud/Spring%20Cloud%20Gateway%E4%B8%8E%E5%90%8E%E7%AB%AF%E6%9C%8D%E5%8A%A1%E9%97%AE%E9%A2%98%E5%A4%84%E7%90%86%E6%80%BB%E7%BB%93/" class="title">Spring Cloud Gateway与后端服务问题处理总结</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-05-18T16:00:00.000Z" itemprop="datePublished">2021-05-19</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-技术/ELK/Beats-Filebeat命令&amp;配置说明" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Beats-Filebeat命令&amp;配置说明
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/04/29/%E6%8A%80%E6%9C%AF/ELK/Beats-Filebeat%E5%91%BD%E4%BB%A4&%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E/" class="article-date">
+	  <time datetime="2021-04-29T03:27:15.000Z" itemprop="datePublished">2021-04-29</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a>►<a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/ELK/" rel="tag">ELK</a>, <a class="article-tag-link-link" href="/tags/Filebeat/" rel="tag">Filebeat</a>, <a class="article-tag-link-link" href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag">技术</a>
+  </span>
+
+
+        
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2021/04/29/%E6%8A%80%E6%9C%AF/ELK/Beats-Filebeat%E5%91%BD%E4%BB%A4&%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E/" class="leancloud_visitors"  data-flag-title="Beats-Filebeat命令&amp;配置说明">
+			<span class="leancloud-visitors-count">0</span>
+		</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/04/29/%E6%8A%80%E6%9C%AF/ELK/Beats-Filebeat%E5%91%BD%E4%BB%A4&%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 2.2k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 8(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <blockquote>
+<p>介绍Filebeat命令、配置以及最佳实战。<br> 基于7.11版本。</p>
+</blockquote>
+<span id="more"></span>
+
+<h2 id="命令"><a href="#命令" class="headerlink" title="命令"></a>命令</h2><ul>
+<li>export：导出配置到标准输出（configuration, index template, ILM policy, dashboard）</li>
+<li>keystore：管理秘钥仓库</li>
+<li>modules：管理模块配置</li>
+<li>run：运行Filebeat。不知道命令的情况下，默认使用此命令<ul>
+<li>–modules MODULE_LIST：指定运行的模块</li>
+</ul>
+</li>
+<li>setup：一次性初始化环境。包括索引模板，ILM政策，写别名，Kibana仪表盘等<ul>
+<li>–dashboards：设置Kibana仪表盘，需配置连接Kibana信息</li>
+<li>–pipelines：设置Elasticsearch的ingest pipelines</li>
+<li>-e：发送输出到标准错误而不是syslog</li>
+<li>–index-management：设置与Elasticsearch索引管理相关的组件（template, ILM policy, and write alias）</li>
+</ul>
+</li>
+<li>test：测试配置文件</li>
+</ul>
+<p>全局标记</p>
+<ul>
+<li>-E, –E “SETTING_NAME=VALUE”：覆盖指定的配置</li>
+<li>-M, –M “VAR_NAME=VALUE”：覆盖默认的模块配置</li>
+<li>-c, –c FILE：指定Filebeat的配置文件</li>
+<li>-f：指定管道配置文件</li>
+<li>-d, –d SELECTORS：调试选择器，”*”：开启所有组件的调试，”publish”：开启调试”publish“相关信息</li>
+<li>-e, –e：日志发送到stderr并禁用syslog文件输出</li>
+<li>–path.config：设置配置文件路径</li>
+</ul>
+<p>示例：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 一次性设置Elasticsearch索引和Kibana仪表板，-e：发送输出到标准错误而不是syslog</span></span><br><span class="line">./filebeat setup -e</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 启用要运行的模块</span></span><br><span class="line">./filebeat modules enable system</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 启动</span></span><br><span class="line">sudo chown root filebeat.yml </span><br><span class="line">sudo ./filebeat -c filebeat.yml -e</span><br></pre></td></tr></table></figure>
+
+<h2 id="配置说明-filebeat-yml"><a href="#配置说明-filebeat-yml" class="headerlink" title="配置说明 filebeat.yml"></a>配置说明 filebeat.yml</h2><ul>
+<li>project paths：项目路径</li>
+<li>general settings：配置包括Global、General</li>
+<li>config file loading：允许外部加载inputs和modules配置</li>
+<li>modules：一种开始处理常见日志格式的快速方法</li>
+<li>inputs：指定Filebeat查找和处理的数据</li>
+<li>output：指定输出。如：Logstash、Elasticsearch、Kafka</li>
+<li>Processors：过滤和增强导出的数据</li>
+<li>internal queue：存储事件的内部缓冲队列（内存和磁盘），负责缓冲输入事件并按批次发送到输出。</li>
+<li>load balancing：配置输出的负载均衡</li>
+<li>logging：Filebeat日志输出选项</li>
+<li>http endpoint：Filebeat通过端点查看内部指标</li>
+<li>autodiscover：容器运行时，自动发现配置，移动目标的监视系统</li>
+</ul>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">### project Paths</span></span><br><span class="line"><span class="comment"># Filebeat主目录，默认安装路径</span></span><br><span class="line"><span class="attr">path.home:</span> </span><br><span class="line"><span class="attr">path.config:</span> <span class="string">$&#123;path.home&#125;</span></span><br><span class="line"><span class="attr">path.data:</span> <span class="string">$&#123;path.home&#125;/data</span></span><br><span class="line"><span class="attr">path.logs:</span> <span class="string">$&#123;path.home&#125;/logs</span></span><br><span class="line"></span><br><span class="line"><span class="comment">### Global Filebeat configuration options</span></span><br><span class="line"><span class="comment"># 注册表的根路径，默认$&#123;path.data&#125;/registry</span></span><br><span class="line"><span class="attr">filebeat.registry.path:</span> <span class="string">registry</span></span><br><span class="line"><span class="attr">filebeat.registry.file_permissions:</span> <span class="number">0600</span></span><br><span class="line"><span class="comment"># 控制何时将注册表项写入磁盘(刷新)的超时值</span></span><br><span class="line"><span class="attr">filebeat.registry.flush:</span> <span class="string">0s</span></span><br><span class="line"><span class="comment"># Filebeat 在关闭之前等待发布者完成发送事件的关闭时间</span></span><br><span class="line"><span class="attr">filebeat.shutdown_timeout:</span> <span class="string">5s</span></span><br><span class="line"></span><br><span class="line"><span class="comment">### General configuration options</span></span><br><span class="line"><span class="comment"># Beat的名字，默认使用主机名</span></span><br><span class="line"><span class="attr">name:</span> <span class="string">my-service</span></span><br><span class="line"><span class="comment"># 标记列表，方便Kibana或Logstash过滤，如服务层，集群名等</span></span><br><span class="line"><span class="attr">tags:</span> [<span class="string">&quot;service-X&quot;</span>, <span class="string">&quot;web-tier&quot;</span>]</span><br><span class="line"><span class="comment"># 属性中添加附加信息的可选字段，如环境信息</span></span><br><span class="line"><span class="attr">fields:</span></span><br><span class="line">  <span class="attr">env:</span> <span class="string">staging</span></span><br><span class="line">  <span class="attr">service_name:</span> <span class="string">service-X</span></span><br><span class="line"><span class="comment"># 将自定义字段作为顶级字段存储到到输出文档中，默认false</span></span><br><span class="line"><span class="attr">fields_under_root:</span> <span class="literal">false</span></span><br><span class="line"></span><br><span class="line"><span class="comment">### Processors configuration</span></span><br><span class="line"><span class="comment"># 定义模块的处理器，删除所有DEBUG消息</span></span><br><span class="line"><span class="attr">processors:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">drop_event:</span></span><br><span class="line">      <span class="attr">when:</span></span><br><span class="line">        <span class="attr">regexp:</span></span><br><span class="line">          <span class="attr">message:</span> <span class="string">&quot;^DBG:&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">### Logging</span></span><br><span class="line"><span class="attr">logging.level:</span> <span class="string">info</span></span><br><span class="line"><span class="attr">logging.to_files:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">logging.files:</span></span><br><span class="line">  <span class="attr">path:</span> <span class="string">/var/log/filebeat</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">filebeat</span></span><br><span class="line">  <span class="comment"># 日志文件最大大小，默认10M</span></span><br><span class="line">  <span class="attr">rotateeverybytes:</span> <span class="number">10485760</span></span><br><span class="line">  <span class="comment"># 日志滚动删除旧文件，默认7</span></span><br><span class="line">  <span class="attr">keepfiles:</span> <span class="number">7</span></span><br><span class="line">  <span class="comment"># 日志文件滚动周期，默认禁用</span></span><br><span class="line">  <span class="attr">interval:</span> <span class="string">24h</span></span><br><span class="line">  <span class="comment"># 标准错误记录到日志文件中</span></span><br><span class="line">  <span class="attr">redirect_stderr:</span> <span class="literal">false</span></span><br><span class="line"><span class="comment"># 定期记录内部发生变化的指标，默认开启</span></span><br><span class="line"><span class="attr">logging.metrics.enabled:</span> <span class="literal">true</span></span><br><span class="line"><span class="comment"># 记录内部指标的时间</span></span><br><span class="line"><span class="attr">logging.metrics.period:</span> <span class="string">30s</span></span><br><span class="line"></span><br><span class="line"><span class="comment">### 外部配置</span></span><br><span class="line"><span class="attr">filebeat.config.inputs:</span></span><br><span class="line">  <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">  <span class="comment"># 要检查的更改文件路径</span></span><br><span class="line">  <span class="attr">path:</span> <span class="string">configs/*.yml</span></span><br><span class="line">  <span class="comment"># 开启配置动态加载</span></span><br><span class="line">  <span class="attr">reload.enabled:</span> <span class="literal">true</span></span><br><span class="line">  <span class="comment"># 指定检查文件更改的频率</span></span><br><span class="line">  <span class="attr">reload.period:</span> <span class="string">10s</span></span><br><span class="line"><span class="attr">filebeat.config.modules:</span></span><br><span class="line">  <span class="attr">path:</span> <span class="string">$&#123;path.config&#125;/modules.d/*.yml</span></span><br><span class="line">  <span class="attr">reload.enabled:</span> <span class="literal">false</span></span><br><span class="line"></span><br><span class="line"><span class="comment">### 日志输入</span></span><br><span class="line"><span class="attr">filebeat.inputs:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">type:</span> <span class="string">log</span></span><br><span class="line">  <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">paths:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">&quot;/var/log/wifi.log&quot;</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">&quot;/var/log/apache2/*&quot;</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">&quot;/var/log/*/*.log&quot;</span></span><br><span class="line">  <span class="comment"># 递归模式，默认false。For example: /foo/** expands to /foo, /foo/*, /foo/*/*, and so on</span></span><br><span class="line">  <span class="attr">recursive_glob.enabled:</span> <span class="literal">false</span></span><br><span class="line">  <span class="comment"># 文件编码</span></span><br><span class="line">  <span class="attr">encoding:</span> <span class="string">plain</span></span><br><span class="line">  <span class="comment"># 设置标记文件的位置</span></span><br><span class="line">  <span class="attr">file_identity.inode_marker.path:</span> <span class="string">/logs/.filebeat-marker</span></span><br><span class="line">  <span class="comment"># 标记列表，方便Kibana或Logstash过滤</span></span><br><span class="line">  <span class="attr">tags:</span> [<span class="string">&quot;service-X&quot;</span>, <span class="string">&quot;web-tier&quot;</span>]</span><br><span class="line">  <span class="comment"># 属性中添加附加信息的可选字段</span></span><br><span class="line">  <span class="attr">fields:</span></span><br><span class="line">    <span class="attr">env:</span> <span class="string">staging</span></span><br><span class="line">  <span class="comment"># 将自定义字段作为顶级字段存储到到输出文档中</span></span><br><span class="line">  <span class="attr">fields_under_root:</span> <span class="literal">false</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment"># 包含的正则表达式列表，先于exclude_lines执行</span></span><br><span class="line">  <span class="attr">include_lines:</span> [<span class="string">&#x27;^ERR&#x27;</span>, <span class="string">&#x27;^WARN&#x27;</span>]</span><br><span class="line">  <span class="comment"># 排除的正则表达式列表</span></span><br><span class="line">  <span class="attr">exclude_lines:</span> [<span class="string">&#x27;^DBG&#x27;</span>]</span><br><span class="line">  <span class="comment"># 多行消息匹配,Java 堆栈跟踪的例子（https://www.elastic.co/guide/en/beats/filebeat/7.x/multiline-examples.html）</span></span><br><span class="line">  <span class="attr">multiline.type:</span> <span class="string">pattern</span></span><br><span class="line">  <span class="attr">multiline.pattern:</span> <span class="string">&#x27;^[[:space:]]+(at|\.&#123;3&#125;)[[:space:]]+\b|^Caused by:&#x27;</span></span><br><span class="line">  <span class="comment"># 否定模式，true：没有匹配的行作为事件行的连贯行；false：匹配的行作为事件行的连贯行。默认false。</span></span><br><span class="line">  <span class="attr">multiline.negate:</span> <span class="literal">false</span></span><br><span class="line">  <span class="comment"># 连贯行组合事件行之前（before）还是之后（after）</span></span><br><span class="line">  <span class="attr">multiline.match:</span> <span class="string">after</span></span><br><span class="line">  <span class="comment"># 每个收割机获取文件时使用的缓冲区大小</span></span><br><span class="line">  <span class="attr">harvester_buffer_size:</span> <span class="number">16384</span></span><br><span class="line">  <span class="comment"># 单个日志消息的最大字节数，超出部分丢弃（10M）</span></span><br><span class="line">  <span class="attr">max_bytes:</span> <span class="number">10485760</span></span><br><span class="line">  <span class="comment"># 排除文件</span></span><br><span class="line">  <span class="attr">exclude_files:</span> [<span class="string">&#x27;\.gz$&#x27;</span>]</span><br><span class="line">  </span><br><span class="line">  <span class="comment">##### Harvester closing options</span></span><br><span class="line">  <span class="comment"># 指定的时间段后关闭文件句柄，基于文件的修改，被扫描到后继续进行。建议设置一个大于最少更新频率的值，默认5分钟</span></span><br><span class="line">  <span class="attr">close_inactive:</span> <span class="string">5m</span></span><br><span class="line">  <span class="comment"># 重命名或移动文件时关闭收割机，默认关闭</span></span><br><span class="line">  <span class="attr">close_renamed:</span> <span class="literal">false</span></span><br><span class="line">  <span class="comment"># 删除文件时立马关闭收割机，当文件再次出现时被扫描到后继续进行，默认启用</span></span><br><span class="line">  <span class="attr">close_removed:</span> <span class="literal">true</span></span><br><span class="line">  <span class="comment"># 收割机到达文件末尾时立刻关闭，默认禁用</span></span><br><span class="line">  <span class="attr">close_eof:</span> <span class="literal">false</span></span><br><span class="line">  <span class="comment"># 指定时间后关闭，按照扫描频路再次开启新的收割机，默认禁用</span></span><br><span class="line">  <span class="attr">close_timeout:</span> <span class="number">0</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment">##### State options</span></span><br><span class="line">  <span class="comment"># 指定时间段后文件无更新，则清除注册表中的状态，默认0，表示禁用清除注册表。clean_inactive设置必须大于ignore_older + scan_frequency，否则可能导致不断的重新发送全部内容</span></span><br><span class="line">  <span class="attr">clean_inactive:</span> <span class="number">0</span></span><br><span class="line">  <span class="comment"># 重命名或移动的文件，注册表中的状态将被清除。默认开启</span></span><br><span class="line">  <span class="attr">clean_removed:</span> <span class="literal">true</span></span><br><span class="line">  <span class="comment"># 扫描频率，默认10秒</span></span><br><span class="line">  <span class="attr">scan_frequency:</span> <span class="string">10s</span></span><br><span class="line">  <span class="comment"># 扫描顺序，默认禁用，可选值：modtime|filename。如果为此设置指定值，则可以使用scan.order配置文件是按升序还是降序进行扫描</span></span><br><span class="line">  <span class="attr">scan.sort:</span> </span><br><span class="line">  <span class="attr">scan.order:</span> <span class="string">asc|desc</span></span><br><span class="line">  <span class="comment"># Filebeat 将开始在每个文件的结尾而不是开始读取新文件，适用于Filebeat尚未处理的文件。如果已经运行过Filebeat并且文件的状态已经保留，则tail_files配置无效。</span></span><br><span class="line">  <span class="attr">tail_files:</span> <span class="literal">false</span></span><br><span class="line">  <span class="comment"># 忽略在指定时间跨度之前修改的所有文件，依赖于文件的修改时间。默认0，不忽略任何文件。必须大于close_inactive</span></span><br><span class="line">  <span class="attr">ignore_older:</span> <span class="number">0</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment"># 限制并行启动的收割机数量</span></span><br><span class="line">  <span class="attr">harvester_limit:</span> <span class="number">0</span></span><br><span class="line">  <span class="comment"># 根据文件的inode和设备id来区分文件</span></span><br><span class="line">  <span class="attr">file_identity.native:</span> <span class="string">~</span></span><br><span class="line">  <span class="comment"># 根据路径来区分文件</span></span><br><span class="line">  <span class="attr">file_identity.path:</span> <span class="string">~</span></span><br><span class="line"></span><br><span class="line"><span class="comment">### 日志输出</span></span><br><span class="line"><span class="attr">output.kafka:</span></span><br><span class="line">  <span class="comment"># kafka服务器</span></span><br><span class="line">  <span class="attr">hosts:</span> [<span class="string">&quot;kafka1:9092&quot;</span>, <span class="string">&quot;kafka2:9092&quot;</span>, <span class="string">&quot;kafka3:9092&quot;</span>]</span><br><span class="line">  <span class="comment"># 动态设置topic</span></span><br><span class="line">  <span class="attr">topic:</span> <span class="string">&#x27;<span class="template-variable">%&#123;[fields.log_topic]&#125;</span>&#x27;</span></span><br><span class="line">  <span class="comment"># 事件将仅发布到可用分区</span></span><br><span class="line">  <span class="attr">partition.round_robin:</span></span><br><span class="line">    <span class="attr">reachable_only:</span> <span class="literal">false</span></span><br><span class="line">  <span class="comment"># ACK可靠性级别，默认1。0 = no response，1 = wait for local commit，-1 = wait for all replica to commit</span></span><br><span class="line">  <span class="attr">required_acks:</span> <span class="number">1</span></span><br><span class="line">  <span class="comment"># gzip压缩级别，0禁用压缩</span></span><br><span class="line">  <span class="attr">compression:</span> <span class="string">gzip</span></span><br><span class="line">  <span class="attr">compression_level:</span> <span class="number">4</span></span><br><span class="line">  <span class="comment"># 消息的最大字节数</span></span><br><span class="line">  <span class="attr">max_message_bytes:</span> <span class="number">1000000</span></span><br><span class="line"><span class="comment"># 负载均衡的Logstash</span></span><br><span class="line"><span class="attr">output.logstash:</span></span><br><span class="line">  <span class="attr">hosts:</span> [<span class="string">&quot;localhost:5044&quot;</span>, <span class="string">&quot;localhost:5045&quot;</span>]</span><br><span class="line">  <span class="attr">loadbalance:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">worker:</span> <span class="number">2</span></span><br><span class="line">  </span><br><span class="line"><span class="comment">### Internal queue</span></span><br><span class="line"><span class="comment"># 用于缓冲要发布的事件的内部队列配置。默认mem（内存队列）</span></span><br><span class="line"><span class="attr">queue.mem:</span></span><br><span class="line">  <span class="comment"># 内存队列的最大缓冲事件数</span></span><br><span class="line">  <span class="attr">events:</span> <span class="number">4096</span></span><br><span class="line">  <span class="comment"># 发布所需的最小事件数，设置为0则发布事件直接输出使用，无需等待</span></span><br><span class="line">  <span class="attr">flush.min_events:</span> <span class="number">2048</span></span><br><span class="line">  <span class="comment"># 达到flush.min_events的最大等待事件，设置为0则无需等待</span></span><br><span class="line">  <span class="attr">flush.timeout:</span> <span class="string">1s</span></span><br><span class="line"><span class="attr">queue.disk:</span></span><br><span class="line">  <span class="comment"># 启用磁盘队列，指定最大大小既使用空间</span></span><br><span class="line">  <span class="attr">max_size:</span> <span class="string">10GB</span></span><br><span class="line">  <span class="attr">path:</span> <span class="string">$&#123;path.data&#125;/diskqueue</span></span><br><span class="line">  <span class="comment"># 队列文件以段的形式保存，每个段包含一些待发送到输出的事件，所有事件发送后删除</span></span><br><span class="line">  <span class="attr">segment_size:</span> <span class="string">max_size</span> <span class="string">/</span> <span class="number">10</span></span><br><span class="line">  <span class="comment"># 当事件等待输出时，从磁盘读取到内存中的事件数。调高此值可以提高输出速度，但是会占用更多内存</span></span><br><span class="line">  <span class="attr">read_ahead:</span> <span class="number">512</span></span><br><span class="line">  <span class="comment"># 队列等待事件写入磁盘时可以存储到内存中的事件数</span></span><br><span class="line">  <span class="attr">write_ahead:</span> <span class="number">2048</span></span><br><span class="line">  <span class="comment"># 磁盘错误导致的队列操作失败，重试间隔时间</span></span><br><span class="line">  <span class="attr">retry_interval:</span> <span class="string">1s</span></span><br><span class="line">  <span class="comment"># 多个连续的写入磁盘错误，队列将重试间隔增加2倍，最大间隔时间</span></span><br><span class="line">  <span class="attr">max_retry_interval:</span> <span class="string">30s</span></span><br><span class="line"><span class="attr">queue.spool:</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="最佳实践调优"><a href="#最佳实践调优" class="headerlink" title="最佳实践调优"></a>最佳实践调优</h2><ul>
+<li><p>文件内容变更延迟发送事件调优<br>默认基于内存缓冲事件，最晚需要11s才会发布事件到输出。<br><code>filebeat.inputs.type:log.scan_frequency: 10s</code>：文件的扫描频率<br><code>queue.mem.flush.timeout: 1s</code>：缓冲事件的超时时间<br><code>queue.mem.flush.min_events: 2048</code>：超时时间内发布事件所需的最小缓冲数</p>
+</li>
+<li><p>测试时编辑文件导致整个文件内容重新发送<br>不要用vim修改，使用<code>echo &quot;xxx&quot; &gt;&gt; log_file</code></p>
+</li>
+</ul>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.lights8080.com/2021/04/29/%E6%8A%80%E6%9C%AF/ELK/Beats-Filebeat%E5%91%BD%E4%BB%A4&%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E/" title="Beats-Filebeat命令&amp;配置说明" target="_blank" rel="external">http://www.lights8080.com/2021/04/29/%E6%8A%80%E6%9C%AF/ELK/Beats-Filebeat%E5%91%BD%E4%BB%A4&%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="http://www.lights8080.com" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="http://www.lights8080.com" target="_blank"><span class="text-dark">七路灯</span><small class="ml-1x">从事互联网开发，信奉终身成长的技术人</small></a></h3>
+        <div>人的一生应当有许多停靠站，我但愿每一个站台都有一盏雾中的灯。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="vcomments"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/05/10/%E6%8A%80%E6%9C%AF/ELK/ELK-%E6%9E%B6%E6%9E%84&%E9%83%A8%E7%BD%B2&%E5%AE%9E%E8%B7%B5%E6%80%BB%E7%BB%93/" title="ELK-架构&amp;部署&amp;实践总结"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/04/29/%E6%8A%80%E6%9C%AF/ELK/Kibana-%E4%BB%8B%E7%BB%8D/" title="Kibana-介绍"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo, wechat" data-mobile-sites="weibo, wechat"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lights8080" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="https://www.zhihu.com/people/lights8080" target="_blank" title="Zhihu" data-toggle=tooltip data-placement=top><i class="icon icon-zhihu"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	<!-- Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>. -->
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+
+
+
+
+   
+    
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/valine"></script>
+  <script type="text/javascript">
+  var GUEST = ['nick', 'mail', 'link'];
+  var meta = 'nick,mail,link';
+  meta = meta.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#vcomments',
+    verify: false,
+    notify: false,
+    appId: '0A4Cg4vm7SmX0sfL9lfvExSq-gzGzoHsz',
+    appKey: 'jkuwap2Fh3CKBlP1SO59uyb4',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: meta,
+    pageSize: '10' || 10,
+    visitor: true
+  });
+  </script>
+
+     
+
+
+
+
+
+
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?cd4db68d2be51fc8c3853594dc53d075";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+</body>
+</html>

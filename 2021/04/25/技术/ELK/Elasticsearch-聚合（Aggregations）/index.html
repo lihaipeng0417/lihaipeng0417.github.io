@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Elasticsearch-聚合（Aggregations） | 七路灯</title>
+  <meta name="description" content="Elasticsearch聚合速查表，介绍指标聚合、桶分聚合、管道聚合的分类和聚合示例。 基于7.11版本。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Elasticsearch-聚合（Aggregations）">
+<meta property="og:url" content="http://www.lights8080.com/2021/04/25/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E8%81%9A%E5%90%88%EF%BC%88Aggregations%EF%BC%89/index.html">
+<meta property="og:site_name" content="七路灯">
+<meta property="og:description" content="Elasticsearch聚合速查表，介绍指标聚合、桶分聚合、管道聚合的分类和聚合示例。 基于7.11版本。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-04-25T03:27:15.000Z">
+<meta property="article:modified_time" content="2021-06-01T10:47:46.000Z">
+<meta property="article:author" content="七路灯">
+<meta property="article:tag" content="技术">
+<meta property="article:tag" content="ELK">
+<meta property="article:tag" content="Elasticsearch">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.lights8080.com/2021/04/25/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E8%81%9A%E5%90%88%EF%BC%88Aggregations%EF%BC%89/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="七路灯" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="../images/favicon.ico" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="http://www.lights8080.com" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">七路灯</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">从事互联网开发，信奉终身成长的技术人</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Beijing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lights8080" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="https://www.zhihu.com/people/lights8080" target="_blank" title="Zhihu" data-toggle=tooltip data-placement=top><i class="icon icon-zhihu"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎关注公众号共同交流学习!</p>
+            </div>
+            <div class="content">
+                <img src="/../images/gongzhonghao-qrcode.jpg" alt="site.qrcode_alt" title="site.qrcode_title" />
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/">人体系统</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><span class="category-list-count">19</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a><span class="category-list-count">14</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/JVM/">JVM</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/Linux/">Linux</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/SpringCloud/">SpringCloud</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%AF%AD%E5%BD%95/">语录</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/ELK/" rel="tag">ELK</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Elasticsearch/" rel="tag">Elasticsearch</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Filebeat/" rel="tag">Filebeat</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/" rel="tag">JVM</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Kibana/" rel="tag">Kibana</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Logstash/" rel="tag">Logstash</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Cloud-Gateway/" rel="tag">Spring Cloud Gateway</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SpringCloud/" rel="tag">SpringCloud</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/" rel="tag">人体系统</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag">技术</a><span class="tag-list-count">19</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%9D%8E%E6%B0%B8%E4%B9%90%E8%80%81%E5%B8%88/" rel="tag">李永乐老师</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AF%AD%E5%BD%95/" rel="tag">语录</a><span class="tag-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/ELK/" style="font-size: 13.8px;">ELK</a> <a href="/tags/Elasticsearch/" style="font-size: 13.6px;">Elasticsearch</a> <a href="/tags/Filebeat/" style="font-size: 13.2px;">Filebeat</a> <a href="/tags/JVM/" style="font-size: 13.2px;">JVM</a> <a href="/tags/Kibana/" style="font-size: 13px;">Kibana</a> <a href="/tags/Linux/" style="font-size: 13.2px;">Linux</a> <a href="/tags/Logstash/" style="font-size: 13.2px;">Logstash</a> <a href="/tags/Spring-Cloud-Gateway/" style="font-size: 13px;">Spring Cloud Gateway</a> <a href="/tags/SpringCloud/" style="font-size: 13px;">SpringCloud</a> <a href="/tags/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/" style="font-size: 13px;">人体系统</a> <a href="/tags/%E6%8A%80%E6%9C%AF/" style="font-size: 14px;">技术</a> <a href="/tags/%E6%9D%8E%E6%B0%B8%E4%B9%90%E8%80%81%E5%B8%88/" style="font-size: 13px;">李永乐老师</a> <a href="/tags/%E8%AF%AD%E5%BD%95/" style="font-size: 13.4px;">语录</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">12</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">三月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/06/02/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/%E8%9B%8B%E7%99%BD%E8%B4%A8/" class="title">(no title)</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-06-02T07:36:12.000Z" itemprop="datePublished">2021-06-02</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/">人体系统</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/06/02/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F-%E7%B3%96/" class="title">人体系统-糖</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-06-01T16:00:00.000Z" itemprop="datePublished">2021-06-02</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/Linux/">Linux</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/05/19/%E6%8A%80%E6%9C%AF/Linux/Linux%20%5Bbuffcache%5D%E5%86%85%E5%AD%98%E7%BC%93%E5%AD%98%E5%8D%A0%E7%94%A8%E8%BF%87%E9%AB%98%E5%88%86%E6%9E%90%E5%92%8C%E4%BC%98%E5%8C%96/" class="title">Linux [buff/cache]内存缓存占用过高分析和优化</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-05-18T16:00:00.000Z" itemprop="datePublished">2021-05-19</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/Linux/">Linux</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/05/19/%E6%8A%80%E6%9C%AF/Linux/OOM%20killer%E5%8F%8AOvercommit/" class="title">OOM killer及Overcommit</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-05-18T16:00:00.000Z" itemprop="datePublished">2021-05-19</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/SpringCloud/">SpringCloud</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/05/19/%E6%8A%80%E6%9C%AF/SpringCloud/Spring%20Cloud%20Gateway%E4%B8%8E%E5%90%8E%E7%AB%AF%E6%9C%8D%E5%8A%A1%E9%97%AE%E9%A2%98%E5%A4%84%E7%90%86%E6%80%BB%E7%BB%93/" class="title">Spring Cloud Gateway与后端服务问题处理总结</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-05-18T16:00:00.000Z" itemprop="datePublished">2021-05-19</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-技术/ELK/Elasticsearch-聚合（Aggregations）" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Elasticsearch-聚合（Aggregations）
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/04/25/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E8%81%9A%E5%90%88%EF%BC%88Aggregations%EF%BC%89/" class="article-date">
+	  <time datetime="2021-04-25T03:27:15.000Z" itemprop="datePublished">2021-04-25</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a>►<a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/ELK/" rel="tag">ELK</a>, <a class="article-tag-link-link" href="/tags/Elasticsearch/" rel="tag">Elasticsearch</a>, <a class="article-tag-link-link" href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag">技术</a>
+  </span>
+
+
+        
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2021/04/25/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E8%81%9A%E5%90%88%EF%BC%88Aggregations%EF%BC%89/" class="leancloud_visitors"  data-flag-title="Elasticsearch-聚合（Aggregations）">
+			<span class="leancloud-visitors-count">0</span>
+		</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/04/25/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E8%81%9A%E5%90%88%EF%BC%88Aggregations%EF%BC%89/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 1.9k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 8(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <blockquote>
+<p>Elasticsearch聚合速查表，介绍指标聚合、桶分聚合、管道聚合的分类和聚合示例。<br> 基于7.11版本。</p>
+</blockquote>
+<span id="more"></span>
+<p>聚合将数据汇总为指标, 统计, 或其他分析。</p>
+<h2 id="聚合分类"><a href="#聚合分类" class="headerlink" title="聚合分类"></a>聚合分类</h2><ul>
+<li>Metric：指标聚合，从文档字段值中计算指标，如总和、平均值等</li>
+<li>Bucket：桶分聚合，根据字段值、范围或其他条件将文档分组为桶</li>
+<li>Pipeline：管道聚合，从其他的聚合结果作为输入</li>
+</ul>
+<h3 id="Bucket"><a href="#Bucket" class="headerlink" title="Bucket"></a>Bucket</h3><ul>
+<li>Adjacency matrix：邻接矩阵，获取矩阵每个组的计数</li>
+<li>Auto-interval date histogram：时间柱状图，根据桶的数量自动的选择桶的间隔</li>
+<li>Children：子聚合，如：join field</li>
+<li>Composite：多存储桶聚合，类似于多字段分组</li>
+<li>Date histogram：日期柱状图，可以按日历感知时间间隔（如：day，week，houth）和固定时间间隔。</li>
+<li>Date range：时间范围聚合，from：从大于等于某个时间，to：到小于某个时间</li>
+<li>Filter：过滤器聚合，将当前的聚合的上下文缩小到一组特定文档。在当前聚合上应用过滤，不影响其他聚合器。</li>
+<li>Filters：多桶过滤器聚合，每个桶都与一个过滤器相关联</li>
+<li>Geo-distance：地理距离聚合，工作在geo_point字段上，定义一个原点或一组距离范围的桶，评估落在每个桶的文档。</li>
+<li>Geo hash grid：网格聚合，每个单元格使用自定义精度的geohash进行标记，geohash可以在1~12之间选择精度</li>
+<li>Geotile grid：网格聚合，每个单元格对应许多在线地图的图块，使用{zoom}/{x}/{y}标记</li>
+<li>Global：在搜索的上下文中定义一个，不受搜索影响的上下文进行聚合。与Filter对应</li>
+<li>Histogram：柱状图聚合，指定间隔，返回落在间隔内的文档数</li>
+<li>IP range：IP类型字段的范围聚合</li>
+<li>Missing：NULL字段聚合</li>
+<li>Nested：嵌套文档聚合</li>
+<li>Parent：父文档聚合</li>
+<li>Range：范围聚合，定义一组范围，每组范围代表一个桶</li>
+<li>Rare terms：稀少（长期分布但不频繁的项）的术语聚合</li>
+<li>Reverse nested：在嵌套聚合内定义聚合父文档</li>
+<li>Sampler：采样器聚合，将聚合的文档限制在得分最高的文档上，降低繁重缓慢的聚合成本。shard_size：限制在每个分片上使用得分最高的文档数</li>
+<li>Diversified sampler：多样化采集聚合，采用多样化的设置进行抽样可以提供一种方法来消除内容偏差</li>
+<li>Terms：动态桶聚合。结果是近似值，可以通过size、shard_size来控制其精度。对标关系数据库中的group by。size：定义返回桶的数；shard_size：每个分片使用文档样本数</li>
+<li>Significant terms：显著的关键词聚合，通过background sets（背景集合）对比聚合数据。通常使用整个索引库内容当做背景集合，可以通过background_filter设置。</li>
+<li>Significant text：显著的文本聚合，像Significant terms一样，区别是作用在text字段</li>
+<li>Variable width histogram：动态的宽度柱状图聚合，定义桶数，动态确定桶间隔。</li>
+<li>Subtleties of bucketing range fields：范围字段导致桶数大于文档数</li>
+</ul>
+<h3 id="Metric"><a href="#Metric" class="headerlink" title="Metric"></a>Metric</h3><ul>
+<li>Avg：计算平均值，单值的指标聚合，提取文档的数值型字段或提供的脚本。</li>
+<li>Min：计算最小值，histogram fields时，返回values中的最小值</li>
+<li>Max：计算最大值</li>
+<li>Sum：计算总和</li>
+<li>Boxplot：盒型图，返回最大值、最小值、25%、50%和75%的值。常用语响应时间的分析</li>
+<li>Cardinality：去重求和，计算不同值的近似计数，可以从文档中的特定字段提取值，也可以通过脚本</li>
+<li>stats：统计信息，多值的指标聚合，可以从文档中的特定字段提取值，也可以通过脚本<ul>
+<li>status: min, max, sum, count and avg</li>
+<li>string stats: count, min_length, max_length, avg_length, entropy</li>
+<li>extended stats: sum_of_squares, variance, std_deviation</li>
+</ul>
+</li>
+<li>geo：地图<ul>
+<li>geo bounds: 地理边界聚合</li>
+<li>geo centroid: 地理重心聚合</li>
+</ul>
+</li>
+<li>Median absolute deviation：中位数绝对偏差，更可靠的统计信息，可以减少异常值对于数据集的影响。</li>
+<li>Percentile rank：百分比等级，显示低于特定值的百分比。如：显示web服务加载时间的占比</li>
+<li>Percentiles：百分位的值，显示出现百分位观察值的点，percents指定返回的百分位。如：显示大于观察值95%的值</li>
+<li>Scripted metric：使用脚本执行获取指标</li>
+<li>Value count：去重计数</li>
+<li>Weighted avg：带权重的平均值</li>
+</ul>
+<h3 id="Pipeline"><a href="#Pipeline" class="headerlink" title="Pipeline"></a>Pipeline</h3><ul>
+<li>Avg bucket：【sibling pipeline aggs】，计算平均值</li>
+<li>max bucket：【sibling pipeline aggs】，计算最大值</li>
+<li>min bucket：【sibling pipeline aggs】，计算最小值</li>
+<li>sum bucket：【sibling pipeline aggs】，计算总和</li>
+<li>bucket script：【parent pipeline aggs】，脚本计算</li>
+<li>bucket selector：【parent pipeline aggs】，桶过滤</li>
+<li>bucket sort：【parent pipeline aggs】，桶排序</li>
+<li>cumulative cardinality：累积基数，此值显示自查询时间段开始以来总的计数，也可显示增量的计数。如：每天网站的新访问者新增数量。</li>
+<li>cumulative sum：累积总和，此值显示自查询时间段开始以来累积总和。如：月销售额的累积总和。</li>
+<li>derivative：柱状图导数计算</li>
+<li>stats bucket：【sibling pipeline aggs】，统计信息，包括min, max, sum, count and avg</li>
+<li>extended stats bucket：【sibling pipeline aggs】扩展的统计信息，包括平方和、标准差等</li>
+<li>inference bucket：【parent pipeline aggs】，训练模型推断</li>
+<li>moving average：滑动窗口平均值</li>
+<li>moving function：滑动窗口上自定义函数</li>
+<li>moving percentiles：基于百分位的滑动窗口</li>
+<li>normalize：计算标准的数学值</li>
+<li>percentiles bucket：计算桶的百分位的值</li>
+<li>serial differencing：时间序列差值</li>
+</ul>
+<h3 id="示例1：聚合、分组"><a href="#示例1：聚合、分组" class="headerlink" title="示例1：聚合、分组"></a>示例1：聚合、分组</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line">GET /bank/_search</span><br><span class="line">&#123;</span><br><span class="line">  # 仅返回聚合结果，不需要搜索结果的内容</span><br><span class="line">  &quot;size&quot;: 0,</span><br><span class="line">  &quot;aggs&quot;: &#123;</span><br><span class="line">    # 单列分组统计，sql: select sum(balance) as sum_balance,avg(balance) as avg_balance from bank group by state.keyword limit 10;</span><br><span class="line">    &quot;group_by_state&quot;: &#123;</span><br><span class="line">      # 定义桶的类型</span><br><span class="line">      &quot;terms&quot;: &#123;</span><br><span class="line">        &quot;field&quot;: &quot;state.keyword&quot;</span><br><span class="line">      &#125;,</span><br><span class="line">      # 添加自定义Mata信息</span><br><span class="line">      &quot;meta&quot;: &#123;</span><br><span class="line">        &quot;my-metadata-field&quot;: &quot;foo&quot;</span><br><span class="line">      &#125;</span><br><span class="line">      # 子聚合</span><br><span class="line">      &quot;aggs&quot;: &#123;</span><br><span class="line">        &quot;avg_balance&quot;: &#123;</span><br><span class="line">          &quot;avg&quot;: &#123;</span><br><span class="line">            &quot;field&quot;: &quot;balance&quot;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;sum_balance&quot;: &#123;</span><br><span class="line">          &quot;sum&quot;: &#123;</span><br><span class="line">            &quot;field&quot;: &quot;balance&quot;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    # 多列分组统计 sql: select sum(balance) as sum_balance from bank group by state.keyword, gender.keyword limit 50;</span><br><span class="line">    &quot;group_by_fields&quot;: &#123;</span><br><span class="line">      &quot;composite&quot;:&#123;</span><br><span class="line">        &quot;sources&quot;: [</span><br><span class="line">          &#123;</span><br><span class="line">            &quot;state&quot;: &#123;</span><br><span class="line">              &quot;terms&quot;: &#123;</span><br><span class="line">                &quot;field&quot;: &quot;state.keyword&quot;</span><br><span class="line">              &#125;</span><br><span class="line">            &#125;</span><br><span class="line">          &#125;,&#123;</span><br><span class="line">            &quot;gender&quot;: &#123;</span><br><span class="line">              &quot;terms&quot;: &#123;</span><br><span class="line">                &quot;field&quot;: &quot;gender.keyword&quot;</span><br><span class="line">              &#125;</span><br><span class="line">            &#125;</span><br><span class="line">          &#125;</span><br><span class="line">        ],</span><br><span class="line">        # 查询记录数，默认10条</span><br><span class="line">        &quot;size&quot;: 50</span><br><span class="line">      &#125;,</span><br><span class="line">      # 子聚合</span><br><span class="line">      &quot;aggs&quot;: &#123;</span><br><span class="line">        &quot;sum_balance&quot;: &#123;</span><br><span class="line">          &quot;sum&quot;: &#123;</span><br><span class="line">            &quot;field&quot;: &quot;balance&quot;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  # 聚合后置过滤器，对聚合结果无影响</span><br><span class="line">  &quot;post_filter&quot;: &#123; </span><br><span class="line">    &quot;term&quot;: &#123; &quot;color&quot;: &quot;red&quot; &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="示例2：条件过滤，多列分组、排序、分页"><a href="#示例2：条件过滤，多列分组、排序、分页" class="headerlink" title="示例2：条件过滤，多列分组、排序、分页"></a>示例2：条件过滤，多列分组、排序、分页</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line">GET /unififi-order/_search</span><br><span class="line">&#123;</span><br><span class="line">  &quot;size&quot;: 0,</span><br><span class="line">  &quot;query&quot;: &#123;</span><br><span class="line">    &quot;range&quot;: &#123;</span><br><span class="line">      &quot;gmtCreate&quot;: &#123;</span><br><span class="line">        &quot;gte&quot;: &quot;2021-05-06 00:00:00&quot;,</span><br><span class="line">        &quot;lte&quot;: &quot;2021-05-06 23:59:59&quot;,</span><br><span class="line">        &quot;format&quot;: &quot;yyyy-MM-dd HH:mm:ss&quot;,</span><br><span class="line">        &quot;time_zone&quot;:&quot;+08:00&quot;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  &quot;aggs&quot;: &#123;</span><br><span class="line">    &quot;group_by_fields&quot;: &#123;</span><br><span class="line">      &quot;composite&quot;:&#123;</span><br><span class="line">        &quot;sources&quot;: [</span><br><span class="line">          &#123;</span><br><span class="line">            &quot;supplierCid&quot;: &#123;</span><br><span class="line">              &quot;terms&quot;: &#123;</span><br><span class="line">                &quot;field&quot;: &quot;supplierCid&quot;</span><br><span class="line">              &#125;</span><br><span class="line">            &#125;</span><br><span class="line">          &#125;,&#123;</span><br><span class="line">            &quot;ipcc&quot;: &#123;</span><br><span class="line">              &quot;terms&quot;: &#123;</span><br><span class="line">                &quot;field&quot;: &quot;ipcc&quot;</span><br><span class="line">              &#125;</span><br><span class="line">            &#125;</span><br><span class="line">          &#125;</span><br><span class="line">        ],</span><br><span class="line">        &quot;size&quot;: 50</span><br><span class="line">      &#125;,</span><br><span class="line">      &quot;aggs&quot;: &#123;</span><br><span class="line">        &quot;sum_totalApiAmount&quot;: &#123;</span><br><span class="line">          &quot;sum&quot;: &#123;</span><br><span class="line">            &quot;field&quot;: &quot;totalApiAmount&quot;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;order_count&quot;: &#123;</span><br><span class="line">          &quot;value_count&quot;: &#123;</span><br><span class="line">            &quot;field&quot;: &quot;id&quot;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;sales_bucket_sort&quot;: &#123;</span><br><span class="line">          &quot;bucket_sort&quot;: &#123;</span><br><span class="line">            &quot;sort&quot;: [</span><br><span class="line">              &#123; &quot;order_count&quot;: &#123; &quot;order&quot;: &quot;asc&quot; &#125; &#125;</span><br><span class="line">            ],</span><br><span class="line">            &quot;from&quot;: 0, </span><br><span class="line">            &quot;size&quot;: 10</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.lights8080.com/2021/04/25/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E8%81%9A%E5%90%88%EF%BC%88Aggregations%EF%BC%89/" title="Elasticsearch-聚合（Aggregations）" target="_blank" rel="external">http://www.lights8080.com/2021/04/25/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E8%81%9A%E5%90%88%EF%BC%88Aggregations%EF%BC%89/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="http://www.lights8080.com" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="http://www.lights8080.com" target="_blank"><span class="text-dark">七路灯</span><small class="ml-1x">从事互联网开发，信奉终身成长的技术人</small></a></h3>
+        <div>人的一生应当有许多停靠站，我但愿每一个站台都有一盏雾中的灯。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="vcomments"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/04/27/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E5%AE%89%E5%85%A8%E7%89%B9%E6%80%A7%EF%BC%88Security%EF%BC%89/" title="Elasticsearch-安全特性（Security）"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/04/16/%E8%AF%AD%E5%BD%95/%E8%AF%AD%E5%BD%95-3/" title="语录-3"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo, wechat" data-mobile-sites="weibo, wechat"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lights8080" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="https://www.zhihu.com/people/lights8080" target="_blank" title="Zhihu" data-toggle=tooltip data-placement=top><i class="icon icon-zhihu"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	<!-- Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>. -->
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+
+
+
+
+   
+    
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/valine"></script>
+  <script type="text/javascript">
+  var GUEST = ['nick', 'mail', 'link'];
+  var meta = 'nick,mail,link';
+  meta = meta.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#vcomments',
+    verify: false,
+    notify: false,
+    appId: '0A4Cg4vm7SmX0sfL9lfvExSq-gzGzoHsz',
+    appKey: 'jkuwap2Fh3CKBlP1SO59uyb4',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: meta,
+    pageSize: '10' || 10,
+    visitor: true
+  });
+  </script>
+
+     
+
+
+
+
+
+
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?cd4db68d2be51fc8c3853594dc53d075";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+</body>
+</html>

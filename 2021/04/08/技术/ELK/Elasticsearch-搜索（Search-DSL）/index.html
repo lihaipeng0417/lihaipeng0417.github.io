@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Elasticsearch-映射（Mapping） | 七路灯</title>
+  <meta name="description" content="Elasticsearch介绍查询搜索请求包含哪些选项，并介绍其中的Query DSL。包括语法说明、查询和过滤上下文、复合查询等和查询示例。 基于7.11版本。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Elasticsearch-映射（Mapping）">
+<meta property="og:url" content="http://www.lights8080.com/2021/04/08/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E6%90%9C%E7%B4%A2%EF%BC%88Search-DSL%EF%BC%89/index.html">
+<meta property="og:site_name" content="七路灯">
+<meta property="og:description" content="Elasticsearch介绍查询搜索请求包含哪些选项，并介绍其中的Query DSL。包括语法说明、查询和过滤上下文、复合查询等和查询示例。 基于7.11版本。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-04-08T03:27:15.000Z">
+<meta property="article:modified_time" content="2021-06-01T10:47:46.000Z">
+<meta property="article:author" content="七路灯">
+<meta property="article:tag" content="技术">
+<meta property="article:tag" content="ELK">
+<meta property="article:tag" content="Elasticsearch">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.lights8080.com/2021/04/08/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E6%90%9C%E7%B4%A2%EF%BC%88Search-DSL%EF%BC%89/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="七路灯" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="../images/favicon.ico" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="http://www.lights8080.com" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">七路灯</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">从事互联网开发，信奉终身成长的技术人</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Beijing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lights8080" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="https://www.zhihu.com/people/lights8080" target="_blank" title="Zhihu" data-toggle=tooltip data-placement=top><i class="icon icon-zhihu"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎关注公众号共同交流学习!</p>
+            </div>
+            <div class="content">
+                <img src="/../images/gongzhonghao-qrcode.jpg" alt="site.qrcode_alt" title="site.qrcode_title" />
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/">人体系统</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><span class="category-list-count">19</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a><span class="category-list-count">14</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/JVM/">JVM</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/Linux/">Linux</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/SpringCloud/">SpringCloud</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%AF%AD%E5%BD%95/">语录</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/ELK/" rel="tag">ELK</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Elasticsearch/" rel="tag">Elasticsearch</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Filebeat/" rel="tag">Filebeat</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/" rel="tag">JVM</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Kibana/" rel="tag">Kibana</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Logstash/" rel="tag">Logstash</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Cloud-Gateway/" rel="tag">Spring Cloud Gateway</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SpringCloud/" rel="tag">SpringCloud</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/" rel="tag">人体系统</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag">技术</a><span class="tag-list-count">19</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%9D%8E%E6%B0%B8%E4%B9%90%E8%80%81%E5%B8%88/" rel="tag">李永乐老师</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AF%AD%E5%BD%95/" rel="tag">语录</a><span class="tag-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/ELK/" style="font-size: 13.8px;">ELK</a> <a href="/tags/Elasticsearch/" style="font-size: 13.6px;">Elasticsearch</a> <a href="/tags/Filebeat/" style="font-size: 13.2px;">Filebeat</a> <a href="/tags/JVM/" style="font-size: 13.2px;">JVM</a> <a href="/tags/Kibana/" style="font-size: 13px;">Kibana</a> <a href="/tags/Linux/" style="font-size: 13.2px;">Linux</a> <a href="/tags/Logstash/" style="font-size: 13.2px;">Logstash</a> <a href="/tags/Spring-Cloud-Gateway/" style="font-size: 13px;">Spring Cloud Gateway</a> <a href="/tags/SpringCloud/" style="font-size: 13px;">SpringCloud</a> <a href="/tags/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/" style="font-size: 13px;">人体系统</a> <a href="/tags/%E6%8A%80%E6%9C%AF/" style="font-size: 14px;">技术</a> <a href="/tags/%E6%9D%8E%E6%B0%B8%E4%B9%90%E8%80%81%E5%B8%88/" style="font-size: 13px;">李永乐老师</a> <a href="/tags/%E8%AF%AD%E5%BD%95/" style="font-size: 13.4px;">语录</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">12</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">三月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/06/02/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/%E8%9B%8B%E7%99%BD%E8%B4%A8/" class="title">(no title)</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-06-02T07:36:12.000Z" itemprop="datePublished">2021-06-02</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/">人体系统</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/06/02/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F-%E7%B3%96/" class="title">人体系统-糖</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-06-01T16:00:00.000Z" itemprop="datePublished">2021-06-02</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/Linux/">Linux</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/05/19/%E6%8A%80%E6%9C%AF/Linux/Linux%20%5Bbuffcache%5D%E5%86%85%E5%AD%98%E7%BC%93%E5%AD%98%E5%8D%A0%E7%94%A8%E8%BF%87%E9%AB%98%E5%88%86%E6%9E%90%E5%92%8C%E4%BC%98%E5%8C%96/" class="title">Linux [buff/cache]内存缓存占用过高分析和优化</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-05-18T16:00:00.000Z" itemprop="datePublished">2021-05-19</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/Linux/">Linux</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/05/19/%E6%8A%80%E6%9C%AF/Linux/OOM%20killer%E5%8F%8AOvercommit/" class="title">OOM killer及Overcommit</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-05-18T16:00:00.000Z" itemprop="datePublished">2021-05-19</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/SpringCloud/">SpringCloud</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/05/19/%E6%8A%80%E6%9C%AF/SpringCloud/Spring%20Cloud%20Gateway%E4%B8%8E%E5%90%8E%E7%AB%AF%E6%9C%8D%E5%8A%A1%E9%97%AE%E9%A2%98%E5%A4%84%E7%90%86%E6%80%BB%E7%BB%93/" class="title">Spring Cloud Gateway与后端服务问题处理总结</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-05-18T16:00:00.000Z" itemprop="datePublished">2021-05-19</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-技术/ELK/Elasticsearch-搜索（Search-DSL）" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Elasticsearch-映射（Mapping）
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/04/08/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E6%90%9C%E7%B4%A2%EF%BC%88Search-DSL%EF%BC%89/" class="article-date">
+	  <time datetime="2021-04-08T03:27:15.000Z" itemprop="datePublished">2021-04-08</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a>►<a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/ELK/" rel="tag">ELK</a>, <a class="article-tag-link-link" href="/tags/Elasticsearch/" rel="tag">Elasticsearch</a>, <a class="article-tag-link-link" href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag">技术</a>
+  </span>
+
+
+        
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2021/04/08/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E6%90%9C%E7%B4%A2%EF%BC%88Search-DSL%EF%BC%89/" class="leancloud_visitors"  data-flag-title="Elasticsearch-映射（Mapping）">
+			<span class="leancloud-visitors-count">0</span>
+		</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/04/08/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E6%90%9C%E7%B4%A2%EF%BC%88Search-DSL%EF%BC%89/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 2.1k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 8(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <blockquote>
+<p>Elasticsearch介绍查询搜索请求包含哪些选项，并介绍其中的Query DSL。包括语法说明、查询和过滤上下文、复合查询等和查询示例。<br> 基于7.11版本。</p>
+</blockquote>
+<span id="more"></span>
+
+<p>搜索请求是对Elasticsearch数据流或索引中的数据信息的请求，包括以下自定义选项：</p>
+<ul>
+<li>Query DSL（查询语法）</li>
+<li>Aggregations（分组聚合）</li>
+<li>Search multiple data streams and indices（多数据流和索引搜索）</li>
+<li>Paginate search results（分页查询）</li>
+<li>Retrieve selected fields（查询指定字段）</li>
+<li>Sort search results（排序）</li>
+<li>Run an async search（异步搜索）<br>本文介绍其中的Query DSL。</li>
+</ul>
+<h2 id="查询特定语言（Query-DSL-Domain-Specific-Language）"><a href="#查询特定语言（Query-DSL-Domain-Specific-Language）" class="headerlink" title="查询特定语言（Query DSL - Domain Specific Language）"></a>查询特定语言（Query DSL - Domain Specific Language）</h2><p>Elasticsearch提供了基于JSON的丰富的查询特定语言来定义查询，包含两种类型的子句组成：</p>
+<ul>
+<li>Leaf query clauses：页查询。在特定的字段中查找特定值，如match、term和range查询</li>
+<li>Compound query clauses：复合查询。包装其他的Leaf和Compound子查询，逻辑组合多个查询（bool、dis_max），或更改其行为（constant_score）。</li>
+</ul>
+<h3 id="查询和过滤上下文（Query-and-filter-context）"><a href="#查询和过滤上下文（Query-and-filter-context）" class="headerlink" title="查询和过滤上下文（Query and filter context）"></a>查询和过滤上下文（Query and filter context）</h3><h4 id="相关性得分（relevance-scores）："><a href="#相关性得分（relevance-scores）：" class="headerlink" title="相关性得分（relevance scores）："></a>相关性得分（relevance scores）：</h4><p>Elasticsearch按相关性得分对匹配的搜索结果进行排序，该得分衡量每个文档与查询的匹配程度。<br>相关性得分是一个正浮点数，在查询API的_score元数据字段中返回，分值越高，文档越相关。<br>不同的查询类型可以计算不同的相关性得分，计算分数还取决于查询子句是运行在查询上下文还是过滤器上下文中。</p>
+<h4 id="查询上下文（Query-context）："><a href="#查询上下文（Query-context）：" class="headerlink" title="查询上下文（Query context）："></a>查询上下文（Query context）：</h4><p>回答的是文档与该查询子句的匹配程度如何，主要用于计算文档相关性得分。</p>
+<h4 id="过滤器上下文（Filter-context）："><a href="#过滤器上下文（Filter-context）：" class="headerlink" title="过滤器上下文（Filter context）："></a>过滤器上下文（Filter context）：</h4><p>回答的是文档与该查询子句是否匹配，主要用于过滤结构化数据，不计算相关性得分。<br>频繁的使用filter context将会被ES自动缓存，以提升性能。</p>
+<h3 id="Compound-queries：复合查询"><a href="#Compound-queries：复合查询" class="headerlink" title="Compound queries：复合查询"></a>Compound queries：复合查询</h3><ul>
+<li>boolean：匹配和过滤，满足条件可以获得更高的得分</li>
+<li>boosting：降低文档的得分，而不是排除</li>
+<li>constant_score：固定值得分</li>
+<li>dis_max：提升多个文档具有相同固定值得分</li>
+<li>function_score：根据算法修改查询文档得分</li>
+</ul>
+<h4 id="1-boolean-query"><a href="#1-boolean-query" class="headerlink" title="1. boolean query"></a>1. boolean query</h4><p>用于匹配和筛选文档。bool查询是采用more-matches-is-better的机制，因此满足must和should子句的文档将获得更高的分值。</p>
+<ul>
+<li>must：返回的文档必须满足此查询子句，参与分值计算</li>
+<li>filter：返回的文档必须满足此查询子句，不参与分值计算，缓存结果</li>
+<li>should：返回的文档可能满足此查询子句，参与分值计算</li>
+<li>must_not：该查询子句必须不能出现在匹配的文档中，不参与分值计算，缓存结果</li>
+<li>minimum_should_match：指定至少匹配几个should子句，若一个bool查询包含至少一个should子句且无must或filter子句，则默认值为1。</li>
+<li>boost：提升权重</li>
+</ul>
+<h4 id="2-boosting"><a href="#2-boosting" class="headerlink" title="2. boosting"></a>2. boosting</h4><p>目的是降低某些文档分值，而不是从结果中排除。</p>
+<p>boosting计算相关性得分规则：</p>
+<ol>
+<li>从符合positive子句的查询中获得原始的相关性得分</li>
+<li>得分 乘上 negative_boost系数，获得最终得分</li>
+</ol>
+<ul>
+<li>positive：必填，返回的文档必须匹配此查询。</li>
+<li>negative：必填，降低匹配文档的分值。</li>
+<li>negative_boost：必填，介于0~1.0之间的数</li>
+</ul>
+<h4 id="3-constant-score"><a href="#3-constant-score" class="headerlink" title="3. constant_score"></a>3. constant_score</h4><p>包装filter query并返回分值，分值等于boost参数。</p>
+<ul>
+<li>filter：必填，返回索引文档都必须匹配的查询条件</li>
+<li>boost：可选，指定分值，默认为1</li>
+</ul>
+<h4 id="4-dis-max"><a href="#4-dis-max" class="headerlink" title="4. dis_max"></a>4. dis_max</h4><p>用于提升多个字段中包含相同术语的文档分配更高的得分。<br>dis_max计算相关性得分规则：</p>
+<ol>
+<li>获得匹配子句中最高得分</li>
+<li>其他匹配的子句得分 乘上 tie_treaker系数</li>
+<li>将最高得分与其他匹配得分相加，获得最终得分</li>
+</ol>
+<ul>
+<li>queries：必填，返回的文档必须匹配一个或多个查询条件，匹配的条件越多则分值越高</li>
+<li>tie_breaker：可选，介于0~1.0之间的数，用于增加匹配文档的分值。默认为0</li>
+</ul>
+<h4 id="5-function-score"><a href="#5-function-score" class="headerlink" title="5. function_score"></a>5. function_score</h4><p>允许修改查询文档的相关性得分，通过得分函数（function_score）在过滤后的文档集合上计算，获得最终得分。</p>
+<ul>
+<li>query：指定查询条件，默认”match_all”: {}</li>
+<li>score_mode：计算分值的模式。multiply（默认）、sum、avg、first、max、min</li>
+<li>boost_mode：计算的分值与查询分值合并模式。multiply（默认）、replace（忽略查询分值）、sum、avg、max、min</li>
+<li>function_score：计算分值的函数。script_score（函数）、weight（权重）、random_score（0~1随机）、field_value_factor（字段因素）</li>
+</ul>
+<h3 id="Full-text-queries：全文检索，查询已分析的文本字段"><a href="#Full-text-queries：全文检索，查询已分析的文本字段" class="headerlink" title="Full text queries：全文检索，查询已分析的文本字段"></a>Full text queries：全文检索，查询已分析的文本字段</h3><ul>
+<li>intervals：根据匹配项的顺序和接近程度返回文档</li>
+<li>match：标准的全文查询，模糊匹配和短语接近查询</li>
+<li>match_bool_prefix：分析其输入解析构造为bool query，最后一个词在前缀查询中使用</li>
+<li>match_phrase：分析其输入解析为短语匹配查询</li>
+<li>match_phrase_prefix：分析其输入解析为短语匹配查询，最后一个词在前缀查询中使用</li>
+<li>multi_match：多个字段匹配查询</li>
+<li>query_string：语法解析器查询</li>
+<li>simple_query_string：更简单的语法解析器查询</li>
+</ul>
+<h3 id="Geo-queries：坐标查询"><a href="#Geo-queries：坐标查询" class="headerlink" title="Geo queries：坐标查询"></a>Geo queries：坐标查询</h3><ul>
+<li>geo_bounding_box：矩形查询</li>
+<li>geo_distance：坐标点范围查询</li>
+<li>geo_polygon：多边形查询</li>
+<li>geo_shape：包括几何图形查询和指定地理形状相交点查询</li>
+</ul>
+<h3 id="Shape-queries：像geo-shape一样，支持索引任意二维的几何图形功能"><a href="#Shape-queries：像geo-shape一样，支持索引任意二维的几何图形功能" class="headerlink" title="Shape queries：像geo_shape一样，支持索引任意二维的几何图形功能"></a>Shape queries：像geo_shape一样，支持索引任意二维的几何图形功能</h3><h3 id="Joining-queries：连接查询"><a href="#Joining-queries：连接查询" class="headerlink" title="Joining queries：连接查询"></a>Joining queries：连接查询</h3><ul>
+<li>nested：嵌套类型查询</li>
+<li>has_child：匹配子文档的字段，返回父文档。前提是同一索引中建立的父子关系</li>
+<li>has_parent：匹配父文档的字段，返回所有子文档。前提是同一索引中建立的父子关系</li>
+<li>parent_id：查询指定父文档的所有子文档。</li>
+</ul>
+<h3 id="Span-queries：区间查询。精准控制多个输入词的先后顺序，已经多个关键词在文档中的前后距离"><a href="#Span-queries：区间查询。精准控制多个输入词的先后顺序，已经多个关键词在文档中的前后距离" class="headerlink" title="Span queries：区间查询。精准控制多个输入词的先后顺序，已经多个关键词在文档中的前后距离"></a>Span queries：区间查询。精准控制多个输入词的先后顺序，已经多个关键词在文档中的前后距离</h3><ul>
+<li>span_containing：区间列表查询</li>
+<li>field_masking_span：允许跨越不同字段查询</li>
+<li>span_first：跨度查询，匹配项必须出现在该字段的前N个位置</li>
+<li>span_multi：Wraps a term, range, prefix, wildcard, regexp, or fuzzy query.</li>
+<li>span_near：接受多个跨度查询，顺序相同且指定距离之内</li>
+<li>span_not：包装其他span query，排除与该文档匹配的所有文档</li>
+<li>span_or：返回任意指定查询匹配的文档</li>
+<li>span_term：等同于term query，可以和其他span query一起使用</li>
+<li>span_within：</li>
+</ul>
+<h3 id="Specialized-queries：专业的查询"><a href="#Specialized-queries：专业的查询" class="headerlink" title="Specialized queries：专业的查询"></a>Specialized queries：专业的查询</h3><ul>
+<li>distance_feature：基于时间或坐标查询，越接近原点得分越高</li>
+<li>more_like_this：按文本、文档和文档的集合查询</li>
+<li>percolate：按存储的指定文档匹配查询</li>
+<li>rank_feature：通过定义字段的rank_feature或rank_features属性值提高得分</li>
+<li>script：脚本过滤文档</li>
+<li>script_score：通过脚本自定义得分</li>
+<li>wrapper：接受一个base64字符串查询</li>
+<li>pinned：提升特定文档的查询</li>
+</ul>
+<h3 id="Term-level-queries：术语级查询"><a href="#Term-level-queries：术语级查询" class="headerlink" title="Term-level queries：术语级查询"></a>Term-level queries：术语级查询</h3><ul>
+<li>exists：返回包含字段的任意文档</li>
+<li>fuzzy：返回搜索词的相似词的文档</li>
+<li>ids：返回指定ID的文档</li>
+<li>prefix：返回字段中指定前缀的文档</li>
+<li>range：返回范围内的文档</li>
+<li>regexp：返回正则匹配的文档</li>
+<li>term：返回字段中包含特定术语的文档</li>
+<li>terms：返回字段中包含一个或多个术语的文档</li>
+<li>terms_set：返回字段中包含最少数目术语的文档</li>
+<li>type：返回指定类型的文档</li>
+<li>wildcard：返回通配符匹配文档</li>
+</ul>
+<h3 id="查询示例"><a href="#查询示例" class="headerlink" title="查询示例"></a>查询示例</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"># 多索引同步搜索</span><br><span class="line">GET /my-index-000001,my-index-000002/_search</span><br><span class="line">&#123;</span><br><span class="line">  # 指定查询超时时间</span><br><span class="line">  &quot;timeout&quot;: &quot;2s&quot;,</span><br><span class="line">  # 字段匹配，相当于query context</span><br><span class="line">  &quot;query&quot;: &#123;</span><br><span class="line">    &quot;bool&quot;: &#123;</span><br><span class="line">      &quot;must&quot;: [</span><br><span class="line">        &#123; &quot;match_all&quot;: &#123;&#125;&#125;,</span><br><span class="line">        &#123; &quot;match&quot;: &#123; &quot;title&quot;: &quot;Search&quot; &#125;&#125;</span><br><span class="line">      ],</span><br><span class="line">      # 相当于filter context</span><br><span class="line">      &quot;filter&quot;: [</span><br><span class="line">        &#123; &quot;term&quot;:  &#123; &quot;status&quot;: &quot;published&quot; , &quot;_name&quot; : &quot;status_pub&quot;&#125;&#125;,</span><br><span class="line">        &#123; &quot;range&quot;: &#123; &quot;publish_date&quot;: &#123; &quot;gte&quot;: &quot;2015-01-01&quot; &#125;&#125;&#125;</span><br><span class="line">      ]</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  # 排序</span><br><span class="line">  &quot;sort&quot;: [</span><br><span class="line">    &#123; &quot;account_number&quot;: &quot;asc&quot; &#125;,</span><br><span class="line">    &#123; &quot;post_date&quot; : &#123;&quot;order&quot; : &quot;asc&quot;&#125;&#125;,</span><br><span class="line">    &quot;_score&quot;</span><br><span class="line">  ],</span><br><span class="line">  # 范围搜索</span><br><span class="line">  &quot;range&quot;: &#123;</span><br><span class="line">    &quot;gmtCreate&quot;: &#123;</span><br><span class="line">      &quot;gte&quot;: &quot;2020-10-01 00:00:00&quot;,</span><br><span class="line">      &quot;lte&quot;: &quot;2020-10-31 23:59:59&quot;,</span><br><span class="line">      &quot;format&quot;: &quot;yyyy-MM-dd HH:mm:ss&quot;,</span><br><span class="line">      &quot;time_zone&quot;:&quot;+08:00&quot;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  # 查询指定字段</span><br><span class="line">  &quot;fields&quot;: [&quot;user.id&quot;, &quot;@timestamp&quot;],</span><br><span class="line">  &quot;_source&quot;: false</span><br><span class="line">  # 分页</span><br><span class="line">  &quot;from&quot;: 10,</span><br><span class="line">  &quot;size&quot;: 10</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.lights8080.com/2021/04/08/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E6%90%9C%E7%B4%A2%EF%BC%88Search-DSL%EF%BC%89/" title="Elasticsearch-映射（Mapping）" target="_blank" rel="external">http://www.lights8080.com/2021/04/08/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E6%90%9C%E7%B4%A2%EF%BC%88Search-DSL%EF%BC%89/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="http://www.lights8080.com" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="http://www.lights8080.com" target="_blank"><span class="text-dark">七路灯</span><small class="ml-1x">从事互联网开发，信奉终身成长的技术人</small></a></h3>
+        <div>人的一生应当有许多停靠站，我但愿每一个站台都有一盏雾中的灯。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="vcomments"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/04/16/%E8%AF%AD%E5%BD%95/%E8%AF%AD%E5%BD%95-3/" title="语录-3"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/04/07/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E7%B4%A2%E5%BC%95%EF%BC%88Index%EF%BC%89/" title="Elasticsearch-索引（Index）"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo, wechat" data-mobile-sites="weibo, wechat"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lights8080" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="https://www.zhihu.com/people/lights8080" target="_blank" title="Zhihu" data-toggle=tooltip data-placement=top><i class="icon icon-zhihu"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	<!-- Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>. -->
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+
+
+
+
+   
+    
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/valine"></script>
+  <script type="text/javascript">
+  var GUEST = ['nick', 'mail', 'link'];
+  var meta = 'nick,mail,link';
+  meta = meta.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#vcomments',
+    verify: false,
+    notify: false,
+    appId: '0A4Cg4vm7SmX0sfL9lfvExSq-gzGzoHsz',
+    appKey: 'jkuwap2Fh3CKBlP1SO59uyb4',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: meta,
+    pageSize: '10' || 10,
+    visitor: true
+  });
+  </script>
+
+     
+
+
+
+
+
+
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?cd4db68d2be51fc8c3853594dc53d075";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+</body>
+</html>

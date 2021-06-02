@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Logstash-介绍 | 七路灯</title>
+  <meta name="description" content="本文内容是通过官网学习Logstash的一个总结，阅读本文可以对Logstash有个整体的认识。包括Logstash介绍、如何工作、事件模型、工作原理、弹性数据、持久化队列、性能优化、部署和扩展等基于7.11版本。https:&#x2F;&#x2F;www.elastic.co&#x2F;guide&#x2F;en&#x2F;logstash&#x2F;7.11&#x2F;index.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Logstash-介绍">
+<meta property="og:url" content="http://www.lights8080.com/2021/03/19/%E6%8A%80%E6%9C%AF/ELK/Logstash-%E4%BB%8B%E7%BB%8D/index.html">
+<meta property="og:site_name" content="七路灯">
+<meta property="og:description" content="本文内容是通过官网学习Logstash的一个总结，阅读本文可以对Logstash有个整体的认识。包括Logstash介绍、如何工作、事件模型、工作原理、弹性数据、持久化队列、性能优化、部署和扩展等基于7.11版本。https:&#x2F;&#x2F;www.elastic.co&#x2F;guide&#x2F;en&#x2F;logstash&#x2F;7.11&#x2F;index.html">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.elastic.co/guide/en/logstash/7.11/static/images/basic_logstash_pipeline.png">
+<meta property="og:image" content="https://www.elastic.co/guide/en/logstash/7.11/static/images/logstash-module-overview.png">
+<meta property="og:image" content="https://www.elastic.co/guide/en/logstash/7.11/static/images/dead_letter_queue.png">
+<meta property="article:published_time" content="2021-03-19T03:27:15.000Z">
+<meta property="article:modified_time" content="2021-06-01T10:47:46.000Z">
+<meta property="article:author" content="七路灯">
+<meta property="article:tag" content="技术">
+<meta property="article:tag" content="ELK">
+<meta property="article:tag" content="Logstash">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.elastic.co/guide/en/logstash/7.11/static/images/basic_logstash_pipeline.png">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.lights8080.com/2021/03/19/%E6%8A%80%E6%9C%AF/ELK/Logstash-%E4%BB%8B%E7%BB%8D/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="七路灯" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="../images/favicon.ico" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="http://www.lights8080.com" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">七路灯</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">从事互联网开发，信奉终身成长的技术人</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Beijing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lights8080" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="https://www.zhihu.com/people/lights8080" target="_blank" title="Zhihu" data-toggle=tooltip data-placement=top><i class="icon icon-zhihu"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎关注公众号共同交流学习!</p>
+            </div>
+            <div class="content">
+                <img src="/../images/gongzhonghao-qrcode.jpg" alt="site.qrcode_alt" title="site.qrcode_title" />
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/">人体系统</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><span class="category-list-count">19</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a><span class="category-list-count">14</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/JVM/">JVM</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/Linux/">Linux</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/SpringCloud/">SpringCloud</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%AF%AD%E5%BD%95/">语录</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/ELK/" rel="tag">ELK</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Elasticsearch/" rel="tag">Elasticsearch</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Filebeat/" rel="tag">Filebeat</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/" rel="tag">JVM</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Kibana/" rel="tag">Kibana</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Logstash/" rel="tag">Logstash</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Cloud-Gateway/" rel="tag">Spring Cloud Gateway</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SpringCloud/" rel="tag">SpringCloud</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/" rel="tag">人体系统</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag">技术</a><span class="tag-list-count">19</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%9D%8E%E6%B0%B8%E4%B9%90%E8%80%81%E5%B8%88/" rel="tag">李永乐老师</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AF%AD%E5%BD%95/" rel="tag">语录</a><span class="tag-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/ELK/" style="font-size: 13.8px;">ELK</a> <a href="/tags/Elasticsearch/" style="font-size: 13.6px;">Elasticsearch</a> <a href="/tags/Filebeat/" style="font-size: 13.2px;">Filebeat</a> <a href="/tags/JVM/" style="font-size: 13.2px;">JVM</a> <a href="/tags/Kibana/" style="font-size: 13px;">Kibana</a> <a href="/tags/Linux/" style="font-size: 13.2px;">Linux</a> <a href="/tags/Logstash/" style="font-size: 13.2px;">Logstash</a> <a href="/tags/Spring-Cloud-Gateway/" style="font-size: 13px;">Spring Cloud Gateway</a> <a href="/tags/SpringCloud/" style="font-size: 13px;">SpringCloud</a> <a href="/tags/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/" style="font-size: 13px;">人体系统</a> <a href="/tags/%E6%8A%80%E6%9C%AF/" style="font-size: 14px;">技术</a> <a href="/tags/%E6%9D%8E%E6%B0%B8%E4%B9%90%E8%80%81%E5%B8%88/" style="font-size: 13px;">李永乐老师</a> <a href="/tags/%E8%AF%AD%E5%BD%95/" style="font-size: 13.4px;">语录</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">12</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">三月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/06/02/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/%E8%9B%8B%E7%99%BD%E8%B4%A8/" class="title">(no title)</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-06-02T07:36:12.000Z" itemprop="datePublished">2021-06-02</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/">人体系统</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/06/02/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F-%E7%B3%96/" class="title">人体系统-糖</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-06-01T16:00:00.000Z" itemprop="datePublished">2021-06-02</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/Linux/">Linux</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/05/19/%E6%8A%80%E6%9C%AF/Linux/Linux%20%5Bbuffcache%5D%E5%86%85%E5%AD%98%E7%BC%93%E5%AD%98%E5%8D%A0%E7%94%A8%E8%BF%87%E9%AB%98%E5%88%86%E6%9E%90%E5%92%8C%E4%BC%98%E5%8C%96/" class="title">Linux [buff/cache]内存缓存占用过高分析和优化</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-05-18T16:00:00.000Z" itemprop="datePublished">2021-05-19</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/Linux/">Linux</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/05/19/%E6%8A%80%E6%9C%AF/Linux/OOM%20killer%E5%8F%8AOvercommit/" class="title">OOM killer及Overcommit</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-05-18T16:00:00.000Z" itemprop="datePublished">2021-05-19</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/SpringCloud/">SpringCloud</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/05/19/%E6%8A%80%E6%9C%AF/SpringCloud/Spring%20Cloud%20Gateway%E4%B8%8E%E5%90%8E%E7%AB%AF%E6%9C%8D%E5%8A%A1%E9%97%AE%E9%A2%98%E5%A4%84%E7%90%86%E6%80%BB%E7%BB%93/" class="title">Spring Cloud Gateway与后端服务问题处理总结</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-05-18T16:00:00.000Z" itemprop="datePublished">2021-05-19</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-技术/ELK/Logstash-介绍" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Logstash-介绍
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/03/19/%E6%8A%80%E6%9C%AF/ELK/Logstash-%E4%BB%8B%E7%BB%8D/" class="article-date">
+	  <time datetime="2021-03-19T03:27:15.000Z" itemprop="datePublished">2021-03-19</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a>►<a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/ELK/" rel="tag">ELK</a>, <a class="article-tag-link-link" href="/tags/Logstash/" rel="tag">Logstash</a>, <a class="article-tag-link-link" href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag">技术</a>
+  </span>
+
+
+        
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2021/03/19/%E6%8A%80%E6%9C%AF/ELK/Logstash-%E4%BB%8B%E7%BB%8D/" class="leancloud_visitors"  data-flag-title="Logstash-介绍">
+			<span class="leancloud-visitors-count">0</span>
+		</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/19/%E6%8A%80%E6%9C%AF/ELK/Logstash-%E4%BB%8B%E7%BB%8D/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 3.5k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 12(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <blockquote>
+<p>本文内容是通过官网学习Logstash的一个总结，阅读本文可以对Logstash有个整体的认识。<br>包括Logstash介绍、如何工作、事件模型、工作原理、弹性数据、持久化队列、性能优化、部署和扩展等<br>基于7.11版本。<br><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/7.11/index.html">https://www.elastic.co/guide/en/logstash/7.11/index.html</a></p>
+</blockquote>
+<span id="more"></span>
+<h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>Logstash是具有实时流水线能力的开源的数据收集引擎。Logstash可以动态统一不同来源的数据，并将数据标准化到您选择的目标输出。它提供了大量插件，可帮助我们解析，丰富，转换和缓冲任何类型的数据。</p>
+<h2 id="如何工作"><a href="#如何工作" class="headerlink" title="如何工作"></a>如何工作</h2><p>管道（Logstash Pipeline）是Logstash中独立的运行单元，每个管道都包含两个必须的元素输入（input）和输出（output），和一个可选的元素过滤器（filter），事件处理管道负责协调它们的执行。<br>输入和输出支持编解码器，使您可以在数据进入或退出管道时对其进行编码或解码，而不必使用单独的过滤器。如：json、multiline等</p>
+<p><img src="https://www.elastic.co/guide/en/logstash/7.11/static/images/basic_logstash_pipeline.png" alt="IMAGE"></p>
+<h4 id="inputs（输入阶段）："><a href="#inputs（输入阶段）：" class="headerlink" title="inputs（输入阶段）："></a>inputs（输入阶段）：</h4><p>会生成事件。包括：file、kafka、beats等</p>
+<h4 id="filters（过滤器阶段）："><a href="#filters（过滤器阶段）：" class="headerlink" title="filters（过滤器阶段）："></a>filters（过滤器阶段）：</h4><p>可以将过滤器和条件语句结合使用对事件进行处理。包括：grok、mutate等</p>
+<h4 id="outputs（输出阶段）："><a href="#outputs（输出阶段）：" class="headerlink" title="outputs（输出阶段）："></a>outputs（输出阶段）：</h4><p>将事件数据发送到特定的目的地，完成了所以输出处理，改事件就完成了执行。如：elasticsearch、file等</p>
+<h4 id="Codecs（解码器）："><a href="#Codecs（解码器）：" class="headerlink" title="Codecs（解码器）："></a>Codecs（解码器）：</h4><p>基本上是流过滤器，作为输入和输出的一部分进行操作，可以轻松地将消息的传输与序列化过程分开。</p>
+<h3 id="1-工作原理"><a href="#1-工作原理" class="headerlink" title="1. 工作原理"></a>1. 工作原理</h3><p>Logstash管道中每个输入阶段都运行在自己的线程中，输入将事件写入到内存或磁盘的中央队列。每个管道工作线程（pipeline worker）从队列中获取一批事件，通过配置的过滤器运行这批事件，然后将过滤的事件运行到所有输出。批处理的大小和工作线程数可以通过<code>pipeline.batch.size</code>和<code>pipeline.workers</code>进行配置。</p>
+<p>默认Logstash在管道各阶段之间使用内存队列来缓存事件，如果发生意外的终止，则内存中的事件都将丢失。为了防止数据丢失，可以启用Logstash配置<code>queue.type: persisted</code>将正在运行的事件持久保存到磁盘。</p>
+<h3 id="2-事件顺序"><a href="#2-事件顺序" class="headerlink" title="2. 事件顺序"></a>2. 事件顺序</h3><p>默认Logstash不保证事件顺序，重新排序可以发送在两个地方：</p>
+<ul>
+<li>批处理中的事件可以在过滤器处理期间重新排序</li>
+<li>当一个或多个批次的处理速度快于其他批次时，可以对批次重新排序</li>
+</ul>
+<p>当维护事件顺序非常重要时，排序设置：</p>
+<ol>
+<li>设置<code>pipeline.ordered: auto</code>且设置<code>pipeline.workers: 1</code>，则自动启用排序。</li>
+<li>设置<code>pipeline.ordered: true</code>，这种方法可以确保批处理是一个一个的执行，并确保确保事件在批处理中保持其顺序。</li>
+<li>设置<code>pipeline.ordered: false</code>则禁用排序处理，但可以节省排序所需的成本。</li>
+</ol>
+<h2 id="Logstash-模块"><a href="#Logstash-模块" class="headerlink" title="Logstash 模块"></a>Logstash 模块</h2><p>Logstash Module提供了一种快速的端到端的解决方案，用于提取数据并使用专用仪表盘对其进行可视化。</p>
+<p>每个模块都内置了Logstash配置、Kibana仪表盘和其他元文件。使您可以更轻松地为特定用例或数据源设置Elastic Stack。</p>
+<p>为了更轻松的上手，Logstash Module提供了三种基本功能，运行模块时将执行以下步骤：</p>
+<ol>
+<li>创建ElasticSearch索引</li>
+<li>设置Kibana仪表盘和可视化数据所需要的索引模式，搜索和可视化。</li>
+<li>使用配置运行Logstash pipeline</li>
+</ol>
+<p><img src="https://www.elastic.co/guide/en/logstash/7.11/static/images/logstash-module-overview.png" alt="IMAGE"></p>
+<h2 id="弹性数据"><a href="#弹性数据" class="headerlink" title="弹性数据"></a>弹性数据</h2><p>当数据流过事件处理管道时，Logstash可能会遇到阻止其事件传递到输出的情况。如：意外的数据类型或异常终止。<br>为了防止数据丢失并确保事件不中断的流过管道，Logstash提供了两种功能。</p>
+<ol>
+<li>持久队列（persistent queues）</li>
+<li>死信队列（dead letter queues-DLQ）</li>
+</ol>
+<h3 id="持久队列"><a href="#持久队列" class="headerlink" title="持久队列"></a>持久队列</h3><p>默认Logstash在管道阶段（inputs-&gt;pipeline worker）之间使用内存中有边界队列来缓冲事件。这些内存队列的大小是固定的，并且不可配置。如果Logstash遇到暂时的计算机故障，那内存队列中的数据将丢失。</p>
+<p>为了防止异常终止期间的数据丢失，Logstash具有持久队列功能，该功能将消息队列存储在磁盘上，提供数据的持久性。<br>持久队列对于需要大缓冲区的Logstash部署也很有用，无需部署和管理消息代理（Kafka、Redis等）以促进缓冲的发布-订阅模型，可以启用持久队列在磁盘上缓冲消息并删除消息代理。</p>
+<p>使用queue.max_bytes可配置磁盘上队列的总容量，当队列已满时，Logstash向输入施加压力阻止数据流入，不再接受新事件，这种机制有助于在输入阶段控制数据流速，不会压倒性的到输出。</p>
+<p>持久队列的好处：</p>
+<ul>
+<li>Logstash异常终止或重启启动时避免数据丢失，将消息存储在磁盘上，直到传递至少成功一次。</li>
+<li>无需使用Kafka外部缓冲消息代理。应对大缓冲区和吸收突发事件。</li>
+</ul>
+<p>无法解决的问题：</p>
+<ol>
+<li>永久性机器故障（如磁盘损坏），持久队列无法防止数据丢失。具有确认能力的Beats和http之类的插件，将受到持久队列的良好保护。</li>
+<li>不使用请求-响应协议的输入插件（如TCP、UDP），持久队列无法防止数据丢失。</li>
+</ol>
+<h4 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h4><ul>
+<li>队列位于输入和过滤器阶段之间：<code>input → queue → filter + output</code>。</li>
+<li>当输入阶段可处理事件时将事件写入队列，成功写入后，输入可以向数据源发送确认（acknowledgement）。</li>
+<li>处理队列中的事件时，Logstash仅在过滤器和输出已完全处理该事件时，该事件才记录（队列保留管道已处理的事件记录）为已处理（acknowledged/ACKed）- 这意味着该事件已由所有已配置的过滤器和输出处理。</li>
+<li>在正常关闭时，Logstash将停止从队列读取数据，并将完成正在由过滤器和输出处理中的事件。重启后，Logstash将恢复处理持久队列中的事件，并接受来自输入的新事件。</li>
+<li>如果Logstash异常终止，任何运行中的事件都不会被记录为ACKed，并且在Logstash重新启动时将被过滤器和输出重新处理。Logstash在批处理事件，当发生异常终止时，可能有一些批处理已经成功完成，但没有记录为 ACKed。</li>
+</ul>
+<h4 id="页"><a href="#页" class="headerlink" title="页"></a>页</h4><p>队列本身就是一个页（page）集合，分为头页（head page）和尾页（tail page），仅有一个头页，达到具体大小（queue.page_capacity）时将变成尾页，并创建一个新的头页。尾页是不可变的，头页是仅追加的。<br>每个页都是一个文件，页中的所有事件确认后，将被删除，如果较旧的页中至少有一个未被确认，整个页将保留在磁盘上，直到成功处理该页上的所有事件为止。</p>
+<h4 id="检查点"><a href="#检查点" class="headerlink" title="检查点"></a>检查点</h4><p>启用持久队列功能后，Logstash通过一种称为检查点（checkpoint）的机制提交到磁盘。检查点文件在单独文件中记录有关自身的详细信息（页信息，确认等）。<br>当记录检查点时，Logstash将调用头页的同步操作和以原子的方式将队列的当前状态写入磁盘。检查点的过程是原子的，意味着如果成功，将保存对文件的任何修改。<br>如果Logstash终止，或者出现硬件级别的故障，则持久队列中缓冲但尚未提交检查点的所有数据都将丢失。<br>可以通过设置queue.checkpoint.writes，强制Logstash更频繁地检查点。为了确保最大的持久性避免丢失数据，可以设置queue.checkpoint.writes为1，在每次事件后强制执行检查点。</p>
+<h3 id="死信队列"><a href="#死信队列" class="headerlink" title="死信队列"></a>死信队列</h3><p>死信队列提供了另一层数据弹性。（当前仅对Elasticsearch输出支持死信队列，用于响应码为400和404的文档，二者均表示无法重试的事件。）<br>默认情况，当Logstash遇到由于数据错误而无法处理事件时，会挂起或删除失败的事件。为了防止数据丢失，可以配置将未成功的事件写入死信队列，而不是丢弃。<br>写入死信队列的每个事件包括原始事件、无法处理的原因、写入事件的插入信息以及事件时间戳。<br>要处理死信队列的事件，需要创建一个管道配置，使用dead_letter_queue插件从死信队列中读取数据。</p>
+<h4 id="工作原理-1"><a href="#工作原理-1" class="headerlink" title="工作原理"></a>工作原理</h4><p><img src="https://www.elastic.co/guide/en/logstash/7.11/static/images/dead_letter_queue.png" alt="IMAGE"></p>
+<p>Elasticsearch无法访问的HTTP请求失败，Elasticsearch输出插件将无限期的重试整个请求，这些场景中死信队列不会拦截。</p>
+<h2 id="部署和扩展"><a href="#部署和扩展" class="headerlink" title="部署和扩展"></a>部署和扩展</h2><p>从操作日志和指标分析到企业和应用程序搜索，Elastic Stack可用于大量用例。确保将数据可扩展、持久和安全地传输到Elasticsearch极为重要，尤其是对于关键任务环境。<br>本文重点介绍Logstash的常见体系结构模型，以及如何随着部署的增长而有效的扩展。重点放在操作日志、指标、安全分析用例上，因为它们往往需要大规模部署。</p>
+<h3 id="Beats-to-Elasticsearch"><a href="#Beats-to-Elasticsearch" class="headerlink" title="Beats to Elasticsearch"></a>Beats to Elasticsearch</h3><p>使用Filebeat Modules，可以快速的收集、解析和索引流行的日志类型和预建的Kibana仪表盘。这种情况下Beats会将数据直接发送到ES，由摄取节点处理并索引数据。</p>
+<h3 id="Beats-and-Logstash-to-Elasticsearch"><a href="#Beats-and-Logstash-to-Elasticsearch" class="headerlink" title="Beats and Logstash to Elasticsearch"></a>Beats and Logstash to Elasticsearch</h3><p>Beats和Logstash共同提供了可扩展且具有弹性的全面解决方案。Beats运行在数千台边缘主机服务器上，将日志收集、拖尾和传输到Logstash。<br>Logstash是水平可伸缩的，可以形成运行同一管道的节点组。Logstash的自适应缓冲功能即使在吞吐量变化不定的情况下也有助于流畅的传输。如果Logstash成为瓶颈，只需要添加更多节点即可进行横向扩展。以下是一些建议：</p>
+<p>扩展：</p>
+<ul>
+<li>Beats应该在一组Logstash节点之间实现负载均衡</li>
+<li>建议至少使用两个Logstash节点已实现高可用性</li>
+<li>通常每个Logstash节点仅部署一个Beats输入，但也可以为每个Logstash节点部署多个Beats输入。</li>
+</ul>
+<p>弹性：</p>
+<ul>
+<li>使用Filebeat/Winlogbeat进行日志收集时，可以保证至少一次交付</li>
+<li>从Filebeat/Winlogbeat到Logstash，以及从Logstash到Elasticsearch这两种通讯协议都是同步且支持确认。其他的Beats不支持。</li>
+</ul>
+<p>处理：</p>
+<ul>
+<li>Logstash通常将使用grok或dissect提取字段，增强地理信息，并可以进一步利用文件、数据库或Elasticsearch查找数据集来丰富事件。</li>
+<li>处理复杂性会影响整体吞吐量和CPU利用率，确保检查其他可用的过滤器插件。</li>
+</ul>
+<h3 id="Integrating-with-Messaging-Queues"><a href="#Integrating-with-Messaging-Queues" class="headerlink" title="Integrating with Messaging Queues"></a>Integrating with Messaging Queues</h3><p>如果现有的基础架构中有消息队列，那么将数据放入Elastic Stack会很容易。如果仅使用消息队列用于Logstash缓冲数据，建议使用Logstash持久队列，消除不必要的复杂性。</p>
+<h2 id="性能调优"><a href="#性能调优" class="headerlink" title="性能调优"></a>性能调优</h2><p>包括性能故障排除和调优和分析Logstash性能。</p>
+<h3 id="JVM"><a href="#JVM" class="headerlink" title="JVM"></a>JVM</h3><ul>
+<li>建议堆的大小应不小于4G且不大于8G，太小会导致JVM不断的进行垃圾回收，造成增加CPU利用率</li>
+<li>堆的大小不要超过物理内存量的水平，必须保留一些内存以运行OS和其他进程，一般不要超过物理内存的50-75％。</li>
+<li>将最小（Xms）和最大（Xmx）堆分配大小设置为相同的值，以防止在运行时调整堆大小，这是一个非常昂贵的过程。</li>
+</ul>
+<h3 id="调优和分析Logstash性能"><a href="#调优和分析Logstash性能" class="headerlink" title="调优和分析Logstash性能"></a>调优和分析Logstash性能</h3><p>Logstash提供了以下选项来优化管道性能，pipeline.workers，pipeline.batch.size和pipeline.batch.delay。</p>
+<h4 id="pipeline-workers"><a href="#pipeline-workers" class="headerlink" title="pipeline.workers"></a>pipeline.workers</h4><p>此设置确定要运行多少个线程以进行过滤和输出处理。如果发现事件正在备份或者CPU没有饱和可以考虑增加此参数以更好的利用可用的处理能力。</p>
+<h4 id="pipeline-batch-size"><a href="#pipeline-batch-size" class="headerlink" title="pipeline.batch.size"></a>pipeline.batch.size</h4><p>此设置定义单个工作线程在尝试执行过滤器和输出之前收集的最大事件数。较大的批处理大小通常更有效，但会增加内存开销。<br>某些硬件配置要求您增加jvm.options配置文件中的JVM堆空间，以避免性能下降。由于频繁的垃圾收集或与内存不足异常相关的JVM崩溃，超出最佳范围的值会导致性能下降。<br>输出插件可以将每个批次作为逻辑单元进行处理。例如，Elasticsearch输出为收到的每个批次发出批量请求。调整pipeline.batch.size设置可调整发送到Elasticsearch的批量请求的大小。</p>
+<h4 id="pipeline-batch-delay"><a href="#pipeline-batch-delay" class="headerlink" title="pipeline.batch.delay"></a>pipeline.batch.delay</h4><p>很少需要调整。此设置调整Logstash管道的延迟。管道批处理延迟是Logstash在当前管道工作线程中接收到事件后等待新消息的最长时间（以毫秒为单位）。经过这段时间后，Logstash开始执行过滤器和输出。Logstash在接收事件和在过滤器中处理该事件之间等待的最长时间是pipeline.batch.delay和pipeline.batch.size设置的乘积。</p>
+<h3 id="管道的配置和优化"><a href="#管道的配置和优化" class="headerlink" title="管道的配置和优化"></a>管道的配置和优化</h3><p>进行中事件的总数由pipeline.workers和pipeline.batch.size设置的乘积确定。注意在间歇地不规则的接收大型事件的管道，需要足够的内存来处理这些峰值。<br>可以将工作线程数设置高于CPU内核数，因为输出通常度过空闲时间在I/O等待条件下。</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.lights8080.com/2021/03/19/%E6%8A%80%E6%9C%AF/ELK/Logstash-%E4%BB%8B%E7%BB%8D/" title="Logstash-介绍" target="_blank" rel="external">http://www.lights8080.com/2021/03/19/%E6%8A%80%E6%9C%AF/ELK/Logstash-%E4%BB%8B%E7%BB%8D/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="http://www.lights8080.com" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="http://www.lights8080.com" target="_blank"><span class="text-dark">七路灯</span><small class="ml-1x">从事互联网开发，信奉终身成长的技术人</small></a></h3>
+        <div>人的一生应当有许多停靠站，我但愿每一个站台都有一盏雾中的灯。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="vcomments"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/03/22/%E6%8A%80%E6%9C%AF/ELK/Logstash-%E9%85%8D%E7%BD%AE/" title="Logstash-配置"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/02/05/%E6%8A%80%E6%9C%AF/JVM/%E7%94%9F%E4%BA%A7%E7%8E%AF%E5%A2%83%E7%9A%84%E4%B8%80%E6%AC%A1JVM%E8%B0%83%E4%BC%98%E8%BF%87%E7%A8%8B/" title="生产环境的一次JVM调优过程"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo, wechat" data-mobile-sites="weibo, wechat"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lights8080" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="https://www.zhihu.com/people/lights8080" target="_blank" title="Zhihu" data-toggle=tooltip data-placement=top><i class="icon icon-zhihu"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	<!-- Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>. -->
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+
+
+
+
+   
+    
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/valine"></script>
+  <script type="text/javascript">
+  var GUEST = ['nick', 'mail', 'link'];
+  var meta = 'nick,mail,link';
+  meta = meta.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#vcomments',
+    verify: false,
+    notify: false,
+    appId: '0A4Cg4vm7SmX0sfL9lfvExSq-gzGzoHsz',
+    appKey: 'jkuwap2Fh3CKBlP1SO59uyb4',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: meta,
+    pageSize: '10' || 10,
+    visitor: true
+  });
+  </script>
+
+     
+
+
+
+
+
+
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?cd4db68d2be51fc8c3853594dc53d075";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+</body>
+</html>
