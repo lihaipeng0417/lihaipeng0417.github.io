@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Elasticsearch-配置及API说明 | 七路灯</title>
+  <meta name="description" content="系统配置理想情况下，Elasticsearch应该单独运行在服务器上，并使用所有可用的资源。为了做到这一点，您需要配置您的操作系统，以允许运行Elasticsearch的用户访问超过默认允许的资源。 Important System Configuration 系统配置-参考$ vim &#x2F;etc&#x2F;security&#x2F;limits.conf 12345678root soft nofile 65535">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Elasticsearch-配置及API说明">
+<meta property="og:url" content="http://www.lights8080.com/2021/06/03/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E9%85%8D%E7%BD%AE%E5%8F%8AAPI%E8%AF%B4%E6%98%8E/index.html">
+<meta property="og:site_name" content="七路灯">
+<meta property="og:description" content="系统配置理想情况下，Elasticsearch应该单独运行在服务器上，并使用所有可用的资源。为了做到这一点，您需要配置您的操作系统，以允许运行Elasticsearch的用户访问超过默认允许的资源。 Important System Configuration 系统配置-参考$ vim &#x2F;etc&#x2F;security&#x2F;limits.conf 12345678root soft nofile 65535">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-06-02T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-06-03T11:50:25.000Z">
+<meta property="article:author" content="七路灯">
+<meta property="article:tag" content="技术">
+<meta property="article:tag" content="ELK">
+<meta property="article:tag" content="Elasticsearch">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.lights8080.com/2021/06/03/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E9%85%8D%E7%BD%AE%E5%8F%8AAPI%E8%AF%B4%E6%98%8E/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="七路灯" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="../images/favicon.ico" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="http://www.lights8080.com" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">七路灯</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">从事互联网开发，信奉终身成长的技术人</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Beijing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lights8080" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="https://www.zhihu.com/people/lights8080" target="_blank" title="Zhihu" data-toggle=tooltip data-placement=top><i class="icon icon-zhihu"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎关注公众号共同交流学习!</p>
+            </div>
+            <div class="content">
+                <img src="/../images/gongzhonghao-qrcode.jpg" alt="site.qrcode_alt" title="site.qrcode_title" />
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/">人体系统</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><span class="category-list-count">22</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/JVM/">JVM</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/Linux/">Linux</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/SpringCloud/">SpringCloud</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%AF%AD%E5%BD%95/">语录</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/ELK/" rel="tag">ELK</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Elasticsearch/" rel="tag">Elasticsearch</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Filebeat/" rel="tag">Filebeat</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/" rel="tag">JVM</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Kibana/" rel="tag">Kibana</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Logstash/" rel="tag">Logstash</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Cloud-Gateway/" rel="tag">Spring Cloud Gateway</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SpringCloud/" rel="tag">SpringCloud</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/" rel="tag">人体系统</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag">技术</a><span class="tag-list-count">22</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%9D%8E%E6%B0%B8%E4%B9%90%E8%80%81%E5%B8%88/" rel="tag">李永乐老师</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AF%AD%E5%BD%95/" rel="tag">语录</a><span class="tag-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/ELK/" style="font-size: 13.8px;">ELK</a> <a href="/tags/Elasticsearch/" style="font-size: 13.6px;">Elasticsearch</a> <a href="/tags/Filebeat/" style="font-size: 13.2px;">Filebeat</a> <a href="/tags/JVM/" style="font-size: 13.2px;">JVM</a> <a href="/tags/Kibana/" style="font-size: 13px;">Kibana</a> <a href="/tags/Linux/" style="font-size: 13.2px;">Linux</a> <a href="/tags/Logstash/" style="font-size: 13.2px;">Logstash</a> <a href="/tags/Spring-Cloud-Gateway/" style="font-size: 13px;">Spring Cloud Gateway</a> <a href="/tags/SpringCloud/" style="font-size: 13px;">SpringCloud</a> <a href="/tags/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/" style="font-size: 13px;">人体系统</a> <a href="/tags/%E6%8A%80%E6%9C%AF/" style="font-size: 14px;">技术</a> <a href="/tags/%E6%9D%8E%E6%B0%B8%E4%B9%90%E8%80%81%E5%B8%88/" style="font-size: 13px;">李永乐老师</a> <a href="/tags/%E8%AF%AD%E5%BD%95/" style="font-size: 13.4px;">语录</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">12</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">三月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/06/03/%E6%8A%80%E6%9C%AF/ELK/ELK-%E9%83%A8%E7%BD%B2%E8%AF%B4%E6%98%8E/" class="title">(no title)</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-06-03T09:48:51.000Z" itemprop="datePublished">2021-06-03</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/06/03/%E6%8A%80%E6%9C%AF/ELK/ELK-%E5%AE%9E%E8%B7%B5%E7%BB%8F%E9%AA%8C%E5%88%86%E4%BA%AB/" class="title">ELK-实践经验分享</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-06-02T16:00:00.000Z" itemprop="datePublished">2021-06-03</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/06/03/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E6%95%B0%E6%8D%AE%E8%BF%81%E7%A7%BB/" class="title">Elasticsearch-数据迁移</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-06-02T16:00:00.000Z" itemprop="datePublished">2021-06-03</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/06/03/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E9%85%8D%E7%BD%AE%E5%8F%8AAPI%E8%AF%B4%E6%98%8E/" class="title">Elasticsearch-配置及API说明</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-06-02T16:00:00.000Z" itemprop="datePublished">2021-06-03</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/06/02/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/%E8%9B%8B%E7%99%BD%E8%B4%A8/" class="title">(no title)</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-06-02T07:36:12.000Z" itemprop="datePublished">2021-06-02</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-技术/ELK/Elasticsearch-配置及API说明" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Elasticsearch-配置及API说明
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/06/03/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E9%85%8D%E7%BD%AE%E5%8F%8AAPI%E8%AF%B4%E6%98%8E/" class="article-date">
+	  <time datetime="2021-06-02T16:00:00.000Z" itemprop="datePublished">2021-06-03</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a>►<a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/ELK/" rel="tag">ELK</a>, <a class="article-tag-link-link" href="/tags/Elasticsearch/" rel="tag">Elasticsearch</a>, <a class="article-tag-link-link" href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag">技术</a>
+  </span>
+
+
+        
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2021/06/03/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E9%85%8D%E7%BD%AE%E5%8F%8AAPI%E8%AF%B4%E6%98%8E/" class="leancloud_visitors"  data-flag-title="Elasticsearch-配置及API说明">
+			<span class="leancloud-visitors-count">0</span>
+		</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/06/03/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E9%85%8D%E7%BD%AE%E5%8F%8AAPI%E8%AF%B4%E6%98%8E/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 2k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 8(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h2 id="系统配置"><a href="#系统配置" class="headerlink" title="系统配置"></a>系统配置</h2><p>理想情况下，Elasticsearch应该单独运行在服务器上，并使用所有可用的资源。为了做到这一点，您需要配置您的操作系统，以允许运行Elasticsearch的用户访问超过默认允许的资源。</p>
+<p><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/7.11/system-config.html">Important System Configuration</a></p>
+<h3 id="系统配置-参考"><a href="#系统配置-参考" class="headerlink" title="系统配置-参考"></a>系统配置-参考</h3><p>$ vim /etc/security/limits.conf</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">root soft nofile 65535</span><br><span class="line">root hard nofile 65535</span><br><span class="line">* soft nofile 65535</span><br><span class="line">* hard nofile 65535</span><br><span class="line">elasticsearch soft memlock unlimited</span><br><span class="line">elasticsearch hard memlock unlimited</span><br><span class="line">elasticsearch soft nproc 4096</span><br><span class="line">elasticsearch hard nproc 4096</span><br></pre></td></tr></table></figure>
+
+<p>$ vim /etc/sysctl.conf</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">vm.max_map_count = 262144</span><br><span class="line">net.ipv4.tcp_retries2 = 5</span><br></pre></td></tr></table></figure>
+
+<h3 id="系统配置-说明"><a href="#系统配置-说明" class="headerlink" title="系统配置-说明"></a>系统配置-说明</h3><h4 id="Disable-swapping（禁用内存交互）"><a href="#Disable-swapping（禁用内存交互）" class="headerlink" title="Disable swapping（禁用内存交互）"></a>Disable swapping（禁用内存交互）</h4><p>大多数操作系统尝试为文件系统缓存使用尽可能多的内存，并急切地交换未使用的应用程序内存。这可能导致部分JVM堆甚至其可执行页被交换到磁盘。交换对于性能和节点稳定性非常不利，应该不惜一切代价避免。</p>
+<ul>
+<li><p>On Linux systems，临时禁用</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo swapoff -a</span><br></pre></td></tr></table></figure></li>
+<li><p>On Linux systems，永久禁用<br>编辑/etc/fstab，注释掉包含swap的任意行</p>
+</li>
+<li><p>Elasticsearch配置<br>set bootstrap.memory_lock to true in elasticsearch.yml</p>
+</li>
+</ul>
+<p>$ vim /etc/security/limits.conf</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># allow user &#x27;elasticsearch&#x27; mlockall</span></span><br><span class="line">elasticsearch soft memlock unlimited</span><br><span class="line">elasticsearch hard memlock unlimited</span><br></pre></td></tr></table></figure>
+
+<p>检查：<br><code>GET _nodes?filter_path=**.mlockall</code><br>如果为false，最可能的原因是，运行Elasticsearch的用户没有锁定内存的权限，通过以下方式授权</p>
+<h4 id="File-Descriptors（文件描述符）"><a href="#File-Descriptors（文件描述符）" class="headerlink" title="File Descriptors（文件描述符）"></a>File Descriptors（文件描述符）</h4><p>Elasticsearch使用了很多文件描述符或文件句柄。耗尽文件描述符可能是灾难性的，很可能会导致数据丢失。确保将运行Elasticsearch的用户打开文件描述符数量的限制增加到65536或更高。</p>
+<p>$ vim /etc/security/limits.conf</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># elasticsearch  -  nofile  65535</span></span><br><span class="line">root soft nofile 65535</span><br><span class="line">root hard nofile 65535</span><br><span class="line">* soft nofile 65535</span><br><span class="line">* hard nofile 65535</span><br></pre></td></tr></table></figure>
+
+<p>检查：<br><code>GET _nodes/stats/process?filter_path=**.max_file_descriptors</code></p>
+<h4 id="Virtual-memory（虚拟内存）"><a href="#Virtual-memory（虚拟内存）" class="headerlink" title="Virtual memory（虚拟内存）"></a>Virtual memory（虚拟内存）</h4><p>Elasticsearch默认使用一个mappfs目录来存储索引。默认操作系统对mmap计数的限制可能太低，这可能会导致内存不足异常。</p>
+<ul>
+<li><p>暂时设置<br><code>sysctl -w vm.max_map_count=262144</code></p>
+</li>
+<li><p>永久设置</p>
+</li>
+</ul>
+<p>$ vim /etc/sysctl.conf</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设置操作系统mmap数限制，Elasticsearch与Lucene使用mmap来映射部分索引到Elasticsearch的地址空间</span></span><br><span class="line"><span class="comment"># 为了让mmap生效，Elasticsearch还需要有创建需要内存映射区的能力。最大map数检查是确保内核允许创建至少262144个内存映射区</span></span><br><span class="line">vm.max_map_count = 262144</span><br></pre></td></tr></table></figure>
+
+<h4 id="Number-of-threads（线程数）"><a href="#Number-of-threads（线程数）" class="headerlink" title="Number of threads（线程数）"></a>Number of threads（线程数）</h4><p>Elasticsearch为不同类型的操作使用了许多线程池。它能够在需要时创建新线程，这一点很重要。确保Elasticsearch用户可以创建的线程数量至少是4096个。</p>
+<p>$ vim /etc/security/limits.conf</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">elasticsearch soft nproc 4096</span><br><span class="line">elasticsearch hard nproc 4096</span><br></pre></td></tr></table></figure>
+
+<h4 id="TCP-retransmission-timeout（TCP重传超时）"><a href="#TCP-retransmission-timeout（TCP重传超时）" class="headerlink" title="TCP retransmission timeout（TCP重传超时）"></a>TCP retransmission timeout（TCP重传超时）</h4><p>集群中的每一对节点通过许多TCP连接进行通信，这些TCP连接一直保持打开状态，直到其中一个节点关闭或由于底层基础设施中的故障而中断节点之间的通信。</p>
+<p>TCP通过对通信应用程序隐藏临时的网络中断，在偶尔不可靠的网络上提供可靠的通信。在通知发送者任何问题之前，您的操作系统将多次重新传输任何丢失的消息。大多数Linux发行版默认重传任何丢失的数据包15次。重传速度呈指数级下降，所以这15次重传需要900秒才能完成。这意味着Linux使用这种方法需要花费许多分钟来检测网络分区或故障节点。Windows默认只有5次重传，相当于6秒左右的超时。</p>
+<p>Linux默认允许在可能经历很长时间包丢失的网络上进行通信，但是对于单个数据中心内的生产网络来说，这个默认值太大了，就像大多数Elasticsearch集群一样。高可用集群必须能够快速检测节点故障，以便它们能够通过重新分配丢失的碎片、重新路由搜索以及可能选择一个新的主节点来迅速作出反应。因此，Linux用户应该减少TCP重传的最大数量。</p>
+<p>$ vim /etc/sysctl.conf</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">net.ipv4.tcp_retries2 = 5</span><br></pre></td></tr></table></figure>
+
+<h2 id="Elasticsearch配置"><a href="#Elasticsearch配置" class="headerlink" title="Elasticsearch配置"></a>Elasticsearch配置</h2><p>默认情况Elasticsearch假设处于开发模式中，任何的配置不正确都会在日志文件中写入警告，能够正常启动和运行节点；一旦配置了像network.host这样的网络设置，Elasticsearch就会假设处于生产环境中，并将上面的警告升级为异常，这些异常将阻止节点启动。</p>
+<p><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/7.11/important-settings.html#important-settings">Important Elasticsearch configuration</a></p>
+<h4 id="config-elasticsearch-yml"><a href="#config-elasticsearch-yml" class="headerlink" title="config/elasticsearch.yml"></a>config/elasticsearch.yml</h4><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ES数据目录和日志目录，path.data可以设置多个路径</span></span><br><span class="line"><span class="attr">path:</span></span><br><span class="line">  <span class="attr">logs:</span> <span class="string">/var/log/elasticsearch</span></span><br><span class="line">  <span class="attr">data:</span> <span class="string">/var/data/elasticsearch</span></span><br><span class="line"><span class="comment"># 集群名称，默认elasticsearch。相同的集群名称的节点，才能加入集群</span></span><br><span class="line"><span class="attr">cluster.name:</span> <span class="string">elasticsearch</span></span><br><span class="line"><span class="comment"># 设置全新群集中符合主机资格的节点的初始集合（首次启动集群时需要）；默认为空表示该节点希望加入已经被引导的集群</span></span><br><span class="line"><span class="attr">cluster.initial_master_nodes:</span> [<span class="string">&quot;10.188.80.14&quot;</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 节点名称，默认随机生成</span></span><br><span class="line"><span class="attr">node.name:</span> <span class="string">prod-data-2</span></span><br><span class="line"><span class="attr">node.master:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">node.data:</span> <span class="literal">true</span></span><br><span class="line"><span class="comment"># 启用预处理，默认启用</span></span><br><span class="line"><span class="attr">node.ingest:</span> <span class="literal">true</span></span><br><span class="line"><span class="comment"># 集群绑定的主机名或IP地址，用于形成一个可以相互通讯的集群；0.0.0.0表示绑定到所有网络接口</span></span><br><span class="line"><span class="attr">network.host:</span> <span class="number">192.168</span><span class="number">.1</span><span class="number">.10</span></span><br><span class="line"><span class="comment"># 节点间通讯绑定端口，默认9300-9400</span></span><br><span class="line"><span class="attr">transport.port:</span> <span class="number">9300</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 提供可访问的集群列表，没有给出端口的通过`transport.port`确定端口，以前使用`discovery.zen.ping.unicast.hosts`</span></span><br><span class="line"><span class="attr">discovery.seed_hosts:</span> [<span class="string">&quot;10.188.80.14&quot;</span>]</span><br><span class="line"><span class="comment"># 启用单节点发现（节点将选举自己为主节点，并且不会与任何其他节点一起加入集群），推迟了TLS的配置；默认形成多节点集群（发现其他节点，并允许他们加入集群）</span></span><br><span class="line"><span class="attr">discovery.type:</span> <span class="string">single-node</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 集群的最小master节点数，避免集群脑裂</span></span><br><span class="line"><span class="attr">discovery.zen.minimum_master_nodes:</span> <span class="number">2</span></span><br><span class="line"><span class="comment"># HTTP服务绑定到的主机地址</span></span><br><span class="line"><span class="attr">http.bind_host:</span> </span><br><span class="line"><span class="comment"># 发布以供HTTP客户端连接的主机地址</span></span><br><span class="line"><span class="attr">http.publish_host:</span> </span><br><span class="line"><span class="comment"># http.bind_host and the http.publish_host</span></span><br><span class="line"><span class="attr">http.host:</span> <span class="string">&quot;10.188.80.14&quot;</span></span><br><span class="line"><span class="comment"># HTTP请求绑定端口，默认9200-9300</span></span><br><span class="line"><span class="attr">http.port:</span> <span class="number">9200</span></span><br><span class="line"><span class="comment"># 允许跨域</span></span><br><span class="line"><span class="attr">http.cors.enabled:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">http.cors.allow-origin:</span> <span class="string">&quot;*&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 禁用swapping，避免影响集群的性能和稳定性，默认开启。（大多数操作系统尝试使用尽可能多的内存文件系统缓存和热切换出未使用的应用程序内存，避免JVM堆交互到磁盘上）</span></span><br><span class="line"><span class="attr">bootstrap.memory_lock:</span> <span class="literal">true</span></span><br><span class="line"><span class="comment"># 开启通过系统调用过滤器检查，默认为true，如果自己承担禁用系统调用过滤器的风险，设置为false</span></span><br><span class="line"><span class="attr">bootstrap.system_call_filter:</span> <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 自动创建索引，默认为true</span></span><br><span class="line"><span class="attr">action.auto_create_index:</span> <span class="literal">true</span></span><br><span class="line"><span class="comment"># 删除索引时必须显示的指定名称，默认为true</span></span><br><span class="line"><span class="attr">action.destructive_requires_name:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="config-jvm-options"><a href="#config-jvm-options" class="headerlink" title="config/ jvm.options"></a>config/ jvm.options</h4><ul>
+<li>Elasticsearch有足够的可用堆是非常重要的。</li>
+<li>堆的最小值（Xms）与堆的最大值（Xmx）设置成相同的。</li>
+<li>Elasticsearch的可用堆越大，它能在内存中缓存的数据越多。但是需要注意堆越大在垃圾回收时造成的暂停会越长。</li>
+<li>设置Xmx不要大于物理内存的50%。用来确保有足够多的物理内存预留给操作系统缓存。</li>
+<li>禁止用串行收集器来运行Elasticsearch（-XX:+UseSerialGC），默认JVM配置通过Elasticsearch的配置将使用CMS回收器。</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-Xms8g</span><br><span class="line">-Xmx8g</span><br></pre></td></tr></table></figure>
+
+<h2 id="API"><a href="#API" class="headerlink" title="API"></a>API</h2><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># elasticsearch集群状态</span></span><br><span class="line">GET /_cat/health?v</span><br><span class="line"><span class="comment"># 列出所有索引</span></span><br><span class="line">GET _cat/indices?v</span><br><span class="line"><span class="comment"># 列出所有节点</span></span><br><span class="line">GET _cat/nodes?v&amp;pretty</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建文档</span></span><br><span class="line">PUT /customer/_doc/1</span><br><span class="line">&#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;John Doe&quot;</span>&#125;</span><br><span class="line"><span class="comment"># 获取文档</span></span><br><span class="line">GET /customer/_doc/1</span><br><span class="line"><span class="comment"># 搜索查询</span></span><br><span class="line">GET /bank/_search</span><br><span class="line">&#123;<span class="string">&quot;query&quot;</span>:&#123;<span class="string">&quot;match_all&quot;</span>:&#123;&#125;&#125;,<span class="string">&quot;sort&quot;</span>:[&#123;<span class="string">&quot;account_number&quot;</span>:<span class="string">&quot;asc&quot;</span>&#125;]&#125;</span><br><span class="line"><span class="comment"># 聚合分析</span></span><br><span class="line">GET /bank/_search</span><br><span class="line">&#123;<span class="string">&quot;size&quot;</span>:0,<span class="string">&quot;aggs&quot;</span>:&#123;<span class="string">&quot;group_by_state&quot;</span>:&#123;<span class="string">&quot;terms&quot;</span>:&#123;<span class="string">&quot;field&quot;</span>:<span class="string">&quot;state.keyword&quot;</span>&#125;&#125;&#125;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建管道</span></span><br><span class="line">PUT _ingest/pipeline/my_pipeline_id</span><br><span class="line">&#123;<span class="string">&quot;description&quot;</span>:<span class="string">&quot;describe pipeline&quot;</span>,<span class="string">&quot;processors&quot;</span>:[&#123;<span class="string">&quot;set&quot;</span>:&#123;<span class="string">&quot;field&quot;</span>:<span class="string">&quot;foo&quot;</span>,<span class="string">&quot;value&quot;</span>:<span class="string">&quot;new&quot;</span>&#125;&#125;]&#125;</span><br><span class="line"><span class="comment"># 创建文档使用管道</span></span><br><span class="line">PUT my-index/_doc/my-id?pipeline=my_pipeline_id</span><br><span class="line">&#123;<span class="string">&quot;foo&quot;</span>: <span class="string">&quot;bar&quot;</span>&#125;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.lights8080.com/2021/06/03/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E9%85%8D%E7%BD%AE%E5%8F%8AAPI%E8%AF%B4%E6%98%8E/" title="Elasticsearch-配置及API说明" target="_blank" rel="external">http://www.lights8080.com/2021/06/03/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E9%85%8D%E7%BD%AE%E5%8F%8AAPI%E8%AF%B4%E6%98%8E/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="http://www.lights8080.com" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="http://www.lights8080.com" target="_blank"><span class="text-dark">七路灯</span><small class="ml-1x">从事互联网开发，信奉终身成长的技术人</small></a></h3>
+        <div>人的一生应当有许多停靠站，我但愿每一个站台都有一盏雾中的灯。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="vcomments"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/06/03/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E6%95%B0%E6%8D%AE%E8%BF%81%E7%A7%BB/" title="Elasticsearch-数据迁移"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/06/02/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/%E8%9B%8B%E7%99%BD%E8%B4%A8/" title="(no title)"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo, wechat" data-mobile-sites="weibo, wechat"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lights8080" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="https://www.zhihu.com/people/lights8080" target="_blank" title="Zhihu" data-toggle=tooltip data-placement=top><i class="icon icon-zhihu"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	<!-- Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>. -->
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+
+
+
+
+   
+    
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/valine"></script>
+  <script type="text/javascript">
+  var GUEST = ['nick', 'mail', 'link'];
+  var meta = 'nick,mail,link';
+  meta = meta.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#vcomments',
+    verify: false,
+    notify: false,
+    appId: '0A4Cg4vm7SmX0sfL9lfvExSq-gzGzoHsz',
+    appKey: 'jkuwap2Fh3CKBlP1SO59uyb4',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: meta,
+    pageSize: '10' || 10,
+    visitor: true
+  });
+  </script>
+
+     
+
+
+
+
+
+
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?cd4db68d2be51fc8c3853594dc53d075";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+</body>
+</html>
