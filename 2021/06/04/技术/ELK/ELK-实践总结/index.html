@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>ELK-实践总结 | 七路灯</title>
+  <meta name="description" content="ELK体现实践总结。包括Elasticsearch的映射和索引、Logstash规则、Filebeat规则、同步ES数据脚本、踩坑及小技巧基于7.11版本。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ELK-实践总结">
+<meta property="og:url" content="http://www.lights8080.com/2021/06/04/%E6%8A%80%E6%9C%AF/ELK/ELK-%E5%AE%9E%E8%B7%B5%E6%80%BB%E7%BB%93/index.html">
+<meta property="og:site_name" content="七路灯">
+<meta property="og:description" content="ELK体现实践总结。包括Elasticsearch的映射和索引、Logstash规则、Filebeat规则、同步ES数据脚本、踩坑及小技巧基于7.11版本。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-06-03T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-06-04T10:58:19.000Z">
+<meta property="article:author" content="七路灯">
+<meta property="article:tag" content="技术">
+<meta property="article:tag" content="ELK">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.lights8080.com/2021/06/04/%E6%8A%80%E6%9C%AF/ELK/ELK-%E5%AE%9E%E8%B7%B5%E6%80%BB%E7%BB%93/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="七路灯" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="../images/favicon.ico" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="http://www.lights8080.com" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">七路灯</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">从事互联网开发，信奉终身成长的技术人</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Beijing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lights8080" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="https://www.zhihu.com/people/lights8080" target="_blank" title="Zhihu" data-toggle=tooltip data-placement=top><i class="icon icon-zhihu"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎关注公众号共同交流学习!</p>
+            </div>
+            <div class="content">
+                <img src="/../images/gongzhonghao-qrcode.jpg" alt="site.qrcode_alt" title="site.qrcode_title" />
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/">人体系统</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><span class="category-list-count">22</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/JVM/">JVM</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/Linux/">Linux</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/SpringCloud/">SpringCloud</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%AF%AD%E5%BD%95/">语录</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/ELK/" rel="tag">ELK</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Elasticsearch/" rel="tag">Elasticsearch</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Filebeat/" rel="tag">Filebeat</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/" rel="tag">JVM</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Kibana/" rel="tag">Kibana</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Logstash/" rel="tag">Logstash</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Cloud-Gateway/" rel="tag">Spring Cloud Gateway</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SpringCloud/" rel="tag">SpringCloud</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/" rel="tag">人体系统</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag">技术</a><span class="tag-list-count">22</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%9D%8E%E6%B0%B8%E4%B9%90%E8%80%81%E5%B8%88/" rel="tag">李永乐老师</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AF%AD%E5%BD%95/" rel="tag">语录</a><span class="tag-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/ELK/" style="font-size: 13.8px;">ELK</a> <a href="/tags/Elasticsearch/" style="font-size: 13.6px;">Elasticsearch</a> <a href="/tags/Filebeat/" style="font-size: 13.2px;">Filebeat</a> <a href="/tags/JVM/" style="font-size: 13.2px;">JVM</a> <a href="/tags/Kibana/" style="font-size: 13px;">Kibana</a> <a href="/tags/Linux/" style="font-size: 13.2px;">Linux</a> <a href="/tags/Logstash/" style="font-size: 13.2px;">Logstash</a> <a href="/tags/Spring-Cloud-Gateway/" style="font-size: 13px;">Spring Cloud Gateway</a> <a href="/tags/SpringCloud/" style="font-size: 13px;">SpringCloud</a> <a href="/tags/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/" style="font-size: 13px;">人体系统</a> <a href="/tags/%E6%8A%80%E6%9C%AF/" style="font-size: 14px;">技术</a> <a href="/tags/%E6%9D%8E%E6%B0%B8%E4%B9%90%E8%80%81%E5%B8%88/" style="font-size: 13px;">李永乐老师</a> <a href="/tags/%E8%AF%AD%E5%BD%95/" style="font-size: 13.4px;">语录</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">12</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">三月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/06/04/%E6%8A%80%E6%9C%AF/ELK/ELK-%E5%AE%9E%E8%B7%B5%E6%80%BB%E7%BB%93/" class="title">ELK-实践总结</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-06-03T16:00:00.000Z" itemprop="datePublished">2021-06-04</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/06/03/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E6%95%B0%E6%8D%AE%E8%BF%81%E7%A7%BB/" class="title">Elasticsearch-数据迁移</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-06-02T16:00:00.000Z" itemprop="datePublished">2021-06-03</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/06/03/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E9%85%8D%E7%BD%AE%E5%8F%8A%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E/" class="title">Elasticsearch-配置及系统配置说明</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-06-02T16:00:00.000Z" itemprop="datePublished">2021-06-03</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/06/02/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/%E8%9B%8B%E7%99%BD%E8%B4%A8/" class="title">(no title)</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-06-02T07:36:12.000Z" itemprop="datePublished">2021-06-02</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/">人体系统</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/06/02/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F-%E7%B3%96/" class="title">人体系统-糖</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-06-01T16:00:00.000Z" itemprop="datePublished">2021-06-02</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-技术/ELK/ELK-实践总结" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      ELK-实践总结
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/06/04/%E6%8A%80%E6%9C%AF/ELK/ELK-%E5%AE%9E%E8%B7%B5%E6%80%BB%E7%BB%93/" class="article-date">
+	  <time datetime="2021-06-03T16:00:00.000Z" itemprop="datePublished">2021-06-04</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a>►<a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/ELK/" rel="tag">ELK</a>, <a class="article-tag-link-link" href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag">技术</a>
+  </span>
+
+
+        
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2021/06/04/%E6%8A%80%E6%9C%AF/ELK/ELK-%E5%AE%9E%E8%B7%B5%E6%80%BB%E7%BB%93/" class="leancloud_visitors"  data-flag-title="ELK-实践总结">
+			<span class="leancloud-visitors-count">0</span>
+		</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/06/04/%E6%8A%80%E6%9C%AF/ELK/ELK-%E5%AE%9E%E8%B7%B5%E6%80%BB%E7%BB%93/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 2.7k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 15(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <blockquote>
+<p>ELK体现实践总结。包括Elasticsearch的映射和索引、Logstash规则、Filebeat规则、同步ES数据脚本、踩坑及小技巧<br>基于7.11版本。</p>
+</blockquote>
+<span id="more"></span>
+
+<h2 id="Elasticsearch-映射和索引"><a href="#Elasticsearch-映射和索引" class="headerlink" title="Elasticsearch 映射和索引"></a>Elasticsearch 映射和索引</h2><ul>
+<li>lights-mappings：组件模板mappings</li>
+<li>lights-settings：组件模板settings</li>
+<li>lights-log：索引生命周期-日志类</li>
+<li>lights-data：索引生命周期-数据类</li>
+<li>lights-service-exception：服务异常信息（数据流）</li>
+<li>lights-nginx-web：Nginx日志（数据流）</li>
+<li>lights-order：订单信息（索引别名）</li>
+</ul>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">### 创建索引模板组件-mapping</span></span><br><span class="line"><span class="string">PUT</span> <span class="string">/_component_template/lights-mappings</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;template&quot;:</span> &#123;</span><br><span class="line">        <span class="attr">&quot;mappings&quot;:</span> &#123;</span><br><span class="line">            <span class="attr">&quot;dynamic_date_formats&quot;:</span> [</span><br><span class="line">                <span class="string">&quot;yyyy-MM-dd HH:mm:ss&quot;</span>,</span><br><span class="line">                <span class="string">&quot;yyyy-MM-dd HH:mm:ss Z&quot;</span>,</span><br><span class="line">                <span class="string">&quot;yyyy-MM-dd HH:mm:ss.SSS&quot;</span>,</span><br><span class="line">                <span class="string">&quot;yyyy-MM-dd HH:mm:ss.SSS Z&quot;</span></span><br><span class="line">            ],</span><br><span class="line">            <span class="attr">&quot;dynamic_templates&quot;:</span> [</span><br><span class="line">                &#123;</span><br><span class="line">                    <span class="attr">&quot;string_as_keyword&quot;:</span> &#123;</span><br><span class="line">                        <span class="attr">&quot;match_mapping_type&quot;:</span> <span class="string">&quot;string&quot;</span>,</span><br><span class="line">                        <span class="attr">&quot;mapping&quot;:</span> &#123;</span><br><span class="line">                            <span class="attr">&quot;type&quot;:</span> <span class="string">&quot;keyword&quot;</span>,</span><br><span class="line">                            <span class="attr">&quot;ignore_above&quot;:</span> <span class="number">1024</span></span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            ],</span><br><span class="line">            <span class="attr">&quot;properties&quot;:</span> &#123;</span><br><span class="line">                <span class="string">&quot;@timestamp&quot;</span><span class="string">:</span> &#123;</span><br><span class="line">                    <span class="attr">&quot;type&quot;:</span> <span class="string">&quot;date&quot;</span></span><br><span class="line">                &#125;,</span><br><span class="line">                <span class="attr">&quot;message&quot;:</span> &#123;</span><br><span class="line">                    <span class="attr">&quot;type&quot;:</span> <span class="string">&quot;text&quot;</span>,</span><br><span class="line">                    <span class="attr">&quot;index&quot;:</span> <span class="literal">false</span></span><br><span class="line">                &#125;,</span><br><span class="line">                <span class="attr">&quot;log&quot;:</span> &#123;</span><br><span class="line">                    <span class="attr">&quot;properties&quot;:</span> &#123;</span><br><span class="line">                        <span class="attr">&quot;file&quot;:</span> &#123;</span><br><span class="line">                            <span class="attr">&quot;properties&quot;:</span> &#123;</span><br><span class="line">                                <span class="attr">&quot;path&quot;:</span> &#123;</span><br><span class="line">                                    <span class="attr">&quot;type&quot;:</span> <span class="string">&quot;text&quot;</span>,</span><br><span class="line">                                    <span class="attr">&quot;index&quot;:</span> <span class="literal">false</span></span><br><span class="line">                                &#125;</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">### 创建索引模板组件-setting</span></span><br><span class="line"><span class="string">PUT</span> <span class="string">/_component_template/lights-settings</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;template&quot;:</span> &#123;</span><br><span class="line">        <span class="attr">&quot;settings&quot;:</span> &#123;</span><br><span class="line">            <span class="attr">&quot;index&quot;:</span> &#123;</span><br><span class="line">                <span class="attr">&quot;number_of_shards&quot;:</span> <span class="number">1</span>,</span><br><span class="line">                <span class="attr">&quot;number_of_replicas&quot;:</span> <span class="number">0</span>,</span><br><span class="line">                <span class="attr">&quot;refresh_interval&quot;:</span> <span class="string">&quot;15s&quot;</span>,</span><br><span class="line">                <span class="attr">&quot;codec&quot;:</span> <span class="string">&quot;best_compression&quot;</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="attr">&quot;query&quot;:</span> &#123;</span><br><span class="line">                <span class="attr">&quot;default_field&quot;:</span> [</span><br><span class="line">                    <span class="string">&quot;@timestamp&quot;</span>,</span><br><span class="line">                    <span class="string">&quot;message&quot;</span></span><br><span class="line">                ]</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">### 创建索引生命周期-日志类</span></span><br><span class="line"><span class="string">PUT</span> <span class="string">_ilm/policy/lights-log</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;policy&quot;:</span> &#123;</span><br><span class="line">    <span class="attr">&quot;phases&quot;:</span> &#123;</span><br><span class="line">      <span class="attr">&quot;hot&quot;:</span> &#123;</span><br><span class="line">        <span class="attr">&quot;actions&quot;:</span> &#123;</span><br><span class="line">          <span class="attr">&quot;rollover&quot;:</span> &#123;</span><br><span class="line">            <span class="attr">&quot;max_size&quot;:</span> <span class="string">&quot;50GB&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;max_age&quot;:</span> <span class="string">&quot;1d&quot;</span></span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="attr">&quot;delete&quot;:</span> &#123;</span><br><span class="line">        <span class="attr">&quot;min_age&quot;:</span> <span class="string">&quot;365d&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;actions&quot;:</span> &#123;</span><br><span class="line">          <span class="attr">&quot;delete&quot;:</span> &#123;&#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">### 创建索引生命周期-数据类</span></span><br><span class="line"><span class="string">PUT</span> <span class="string">/_ilm/policy/lights-data</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;policy&quot;:</span> &#123;</span><br><span class="line">    <span class="attr">&quot;phases&quot;:</span> &#123;</span><br><span class="line">      <span class="attr">&quot;hot&quot;:</span> &#123;</span><br><span class="line">        <span class="attr">&quot;actions&quot;:</span> &#123;</span><br><span class="line">          <span class="attr">&quot;rollover&quot;:</span> &#123;</span><br><span class="line">            <span class="attr">&quot;max_size&quot;:</span> <span class="string">&quot;50GB&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;max_age&quot;:</span> <span class="string">&quot;30d&quot;</span></span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">### 创建索引模板（数据流）-服务异常信息</span></span><br><span class="line"><span class="string">POST</span> <span class="string">/_index_template/lights-service-exception</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;index_patterns&quot;:</span> [</span><br><span class="line">        <span class="string">&quot;lights-service-exception&quot;</span></span><br><span class="line">    ],</span><br><span class="line">    <span class="attr">&quot;data_stream&quot;:</span> &#123;&#125;,</span><br><span class="line">    <span class="attr">&quot;template&quot;:</span> &#123;</span><br><span class="line">        <span class="attr">&quot;settings&quot;:</span> &#123;</span><br><span class="line">            <span class="attr">&quot;number_of_shards&quot;:</span> <span class="number">1</span>,</span><br><span class="line">            <span class="attr">&quot;number_of_replicas&quot;:</span> <span class="number">0</span>,</span><br><span class="line">            <span class="attr">&quot;refresh_interval&quot;:</span> <span class="string">&quot;15s&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;index.lifecycle.name&quot;:</span> <span class="string">&quot;lights-data&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">&quot;priority&quot;:</span> <span class="number">100</span>,</span><br><span class="line">    <span class="attr">&quot;composed_of&quot;:</span> [</span><br><span class="line">        <span class="string">&quot;lights-mappings&quot;</span>,</span><br><span class="line">        <span class="string">&quot;lights-settings&quot;</span></span><br><span class="line">    ],</span><br><span class="line">    <span class="attr">&quot;_meta&quot;:</span> &#123;</span><br><span class="line">        <span class="attr">&quot;description&quot;:</span> <span class="string">&quot;索引模板-服务异常信息&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">### 创建索引模板（数据流）-Nginx日志</span></span><br><span class="line"><span class="string">POST</span> <span class="string">/_index_template/lights-nginx-web</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;index_patterns&quot;:</span> [</span><br><span class="line">        <span class="string">&quot;lights-nginx-web&quot;</span></span><br><span class="line">    ],</span><br><span class="line">    <span class="attr">&quot;data_stream&quot;:</span> &#123;&#125;,</span><br><span class="line">    <span class="attr">&quot;template&quot;:</span> &#123;</span><br><span class="line">        <span class="attr">&quot;settings&quot;:</span> &#123;</span><br><span class="line">            <span class="attr">&quot;number_of_shards&quot;:</span> <span class="number">1</span>,</span><br><span class="line">            <span class="attr">&quot;number_of_replicas&quot;:</span> <span class="number">0</span>,</span><br><span class="line">            <span class="attr">&quot;refresh_interval&quot;:</span> <span class="string">&quot;15s&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;codec&quot;:</span> <span class="string">&quot;best_compression&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;index.lifecycle.name&quot;:</span> <span class="string">&quot;lights-log&quot;</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="attr">&quot;mappings&quot;:</span> &#123;</span><br><span class="line">            <span class="attr">&quot;properties&quot;:</span> &#123;</span><br><span class="line">                <span class="attr">&quot;bytes&quot;:</span> &#123;</span><br><span class="line">                    <span class="attr">&quot;type&quot;:</span> <span class="string">&quot;long&quot;</span></span><br><span class="line">                &#125;,</span><br><span class="line">                <span class="attr">&quot;status&quot;:</span> &#123;</span><br><span class="line">                    <span class="attr">&quot;type&quot;:</span> <span class="string">&quot;integer&quot;</span></span><br><span class="line">                &#125;,</span><br><span class="line">                <span class="attr">&quot;request_time&quot;:</span> &#123;</span><br><span class="line">                    <span class="attr">&quot;type&quot;:</span> <span class="string">&quot;double&quot;</span></span><br><span class="line">                &#125;,</span><br><span class="line">                <span class="attr">&quot;upstream_status&quot;:</span> &#123;</span><br><span class="line">                    <span class="attr">&quot;type&quot;:</span> <span class="string">&quot;integer&quot;</span></span><br><span class="line">                &#125;,</span><br><span class="line">                <span class="attr">&quot;upstream_response_time&quot;:</span> &#123;</span><br><span class="line">                    <span class="attr">&quot;type&quot;:</span> <span class="string">&quot;double&quot;</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">&quot;priority&quot;:</span> <span class="number">100</span>,</span><br><span class="line">    <span class="attr">&quot;composed_of&quot;:</span> [</span><br><span class="line">        <span class="string">&quot;lights-mappings&quot;</span>,</span><br><span class="line">        <span class="string">&quot;lights-settings&quot;</span></span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">### 创建索引模板（索引别名）-订单数据</span></span><br><span class="line"><span class="string">POST</span> <span class="string">/_index_template/lights-order</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;index_patterns&quot;:</span> [</span><br><span class="line">        <span class="string">&quot;lights-order-*&quot;</span></span><br><span class="line">    ],</span><br><span class="line">    <span class="attr">&quot;template&quot;:</span> &#123;</span><br><span class="line">        <span class="attr">&quot;settings&quot;:</span> &#123;</span><br><span class="line">            <span class="attr">&quot;number_of_shards&quot;:</span> <span class="number">1</span>,</span><br><span class="line">            <span class="attr">&quot;number_of_replicas&quot;:</span> <span class="number">0</span>,</span><br><span class="line">            <span class="attr">&quot;refresh_interval&quot;:</span> <span class="string">&quot;15s&quot;</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="attr">&quot;mappings&quot;:</span> &#123;</span><br><span class="line">            <span class="attr">&quot;dynamic_date_formats&quot;:</span> [</span><br><span class="line">                <span class="string">&quot;yyyy-MM-dd HH:mm:ss&quot;</span>,</span><br><span class="line">                <span class="string">&quot;yyyy-MM-dd HH:mm:ss Z&quot;</span>,</span><br><span class="line">                <span class="string">&quot;yyyy-MM-dd HH:mm:ss.SSS&quot;</span>,</span><br><span class="line">                <span class="string">&quot;yyyy-MM-dd HH:mm:ss.SSS Z&quot;</span></span><br><span class="line">            ],</span><br><span class="line">            <span class="attr">&quot;dynamic_templates&quot;:</span> [</span><br><span class="line">                &#123;</span><br><span class="line">                    <span class="attr">&quot;string_as_keyword&quot;:</span> &#123;</span><br><span class="line">                        <span class="attr">&quot;match_mapping_type&quot;:</span> <span class="string">&quot;string&quot;</span>,</span><br><span class="line">                        <span class="attr">&quot;mapping&quot;:</span> &#123;</span><br><span class="line">                            <span class="attr">&quot;type&quot;:</span> <span class="string">&quot;keyword&quot;</span>,</span><br><span class="line">                            <span class="attr">&quot;ignore_above&quot;:</span> <span class="number">1024</span></span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;,</span><br><span class="line">                &#123;</span><br><span class="line">                    <span class="attr">&quot;total_as_double&quot;:</span> &#123;</span><br><span class="line">                        <span class="attr">&quot;match_mapping_type&quot;:</span> <span class="string">&quot;long&quot;</span>,</span><br><span class="line">                        <span class="attr">&quot;match&quot;:</span>   <span class="string">&quot;*Amount&quot;</span>,</span><br><span class="line">                        <span class="attr">&quot;mapping&quot;:</span> &#123;</span><br><span class="line">                            <span class="attr">&quot;type&quot;:</span> <span class="string">&quot;double&quot;</span></span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            ],</span><br><span class="line">            <span class="attr">&quot;properties&quot;:</span> &#123;</span><br><span class="line">                <span class="attr">&quot;orderNum&quot;:</span> &#123;</span><br><span class="line">                    <span class="attr">&quot;type&quot;:</span> <span class="string">&quot;integer&quot;</span></span><br><span class="line">                &#125;,</span><br><span class="line">                <span class="attr">&quot;logs&quot;:</span> &#123;</span><br><span class="line">                    <span class="attr">&quot;properties&quot;:</span> &#123;</span><br><span class="line">                        <span class="attr">&quot;remark&quot;:</span> &#123;</span><br><span class="line">                            <span class="attr">&quot;type&quot;:</span> <span class="string">&quot;text&quot;</span></span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="attr">&quot;aliases&quot;:</span> &#123;</span><br><span class="line">            <span class="attr">&quot;lights-order&quot;:</span> &#123;&#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">&quot;priority&quot;:</span> <span class="number">100</span>,</span><br><span class="line">    <span class="attr">&quot;_meta&quot;:</span> &#123;</span><br><span class="line">        <span class="attr">&quot;description&quot;:</span> <span class="string">&quot;索引模板-订单数据&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Logstash-Config"><a href="#Logstash-Config" class="headerlink" title="Logstash Config"></a>Logstash Config</h2><p>config/lights.conf</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Sample Logstash configuration for creating a simple</span></span><br><span class="line"><span class="comment"># Beats -&gt; Logstash -&gt; Elasticsearch pipeline.</span></span><br><span class="line"></span><br><span class="line"><span class="string">input</span> &#123;</span><br><span class="line">    <span class="string">beats</span> &#123;</span><br><span class="line">        <span class="string">port</span> <span class="string">=&gt;</span> <span class="number">5044</span></span><br><span class="line">        <span class="string">host</span> <span class="string">=&gt;</span> <span class="string">&quot;0.0.0.0&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="string">filter</span> &#123;</span><br><span class="line">    <span class="string">if</span> <span class="string">&quot;lights-service&quot;</span> <span class="string">in</span> [<span class="string">tags</span>] &#123;</span><br><span class="line">        <span class="string">if</span> <span class="type">!([service_name])</span> &#123;</span><br><span class="line">            <span class="string">mutate</span> &#123;</span><br><span class="line">                <span class="string">copy</span> <span class="string">=&gt;</span> &#123; <span class="string">&quot;[log][file][path]&quot;</span> <span class="string">=&gt;</span> <span class="string">&quot;log_file_path&quot;</span> &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="string">mutate</span> &#123;</span><br><span class="line">                <span class="string">split</span> <span class="string">=&gt;</span> [ <span class="string">&quot;log_file_path&quot;</span> , <span class="string">&quot;/&quot;</span> ]</span><br><span class="line">                <span class="string">add_field</span> <span class="string">=&gt;</span> &#123; <span class="string">&quot;service_name&quot;</span> <span class="string">=&gt;</span> <span class="string">&quot;<span class="template-variable">%&#123;[log_file_path][2]&#125;</span>&quot;</span> &#125;</span><br><span class="line">                <span class="string">remove_field</span> <span class="string">=&gt;</span> [<span class="string">&quot;log_file_path&quot;</span>]</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="string">if</span> [<span class="string">message</span>] <span class="string">=~</span> <span class="string">&quot; ERROR &quot;</span> <span class="string">and</span> [<span class="string">message</span>] <span class="string">=~</span> <span class="string">&quot;Exception&quot;</span> &#123;</span><br><span class="line">            <span class="string">truncate</span> &#123;</span><br><span class="line">                <span class="string">fields</span> <span class="string">=&gt;</span> [<span class="string">&quot;message&quot;</span>]</span><br><span class="line">                <span class="string">length_bytes</span> <span class="string">=&gt;</span> <span class="number">10000</span></span><br><span class="line">            &#125;</span><br><span class="line">            <span class="string">grok</span> &#123;</span><br><span class="line">                <span class="string">match</span> <span class="string">=&gt;</span> &#123;</span><br><span class="line">                    <span class="string">&quot;message&quot;</span> <span class="string">=&gt;</span> [</span><br><span class="line">                        <span class="string">&quot;<span class="template-variable">%&#123;TIMESTAMP_ISO8601:timestamp&#125;</span> \[<span class="template-variable">%&#123;DATA:thread&#125;</span>\] <span class="template-variable">%&#123;DATA:level&#125;</span> <span class="template-variable">%&#123;DATA:class&#125;</span> - <span class="template-variable">%&#123;DATA:error_message&#125;</span>\n<span class="template-variable">%&#123;GREEDYDATA:throwable&#125;</span>&quot;</span>,</span><br><span class="line">                        <span class="string">&quot;<span class="template-variable">%&#123;TIMESTAMP_ISO8601:timestamp&#125;</span> \[<span class="template-variable">%&#123;DATA:thread&#125;</span>\] <span class="template-variable">%&#123;DATA:level&#125;</span> <span class="template-variable">%&#123;DATA:class&#125;</span> - <span class="template-variable">%&#123;DATA:error_message&#125;</span>&quot;</span>,</span><br><span class="line">                        <span class="string">&quot;<span class="template-variable">%&#123;TIMESTAMP_ISO8601:timestamp&#125;</span> \[<span class="template-variable">%&#123;DATA:thread&#125;</span>\] <span class="template-variable">%&#123;DATA:level&#125;</span> - <span class="template-variable">%&#123;DATA:error_message&#125;</span>\n<span class="template-variable">%&#123;GREEDYDATA:throwable&#125;</span>&quot;</span>,</span><br><span class="line">                        <span class="string">&quot;<span class="template-variable">%&#123;TIMESTAMP_ISO8601:timestamp&#125;</span> \[<span class="template-variable">%&#123;DATA:thread&#125;</span>\] <span class="template-variable">%&#123;DATA:level&#125;</span> - <span class="template-variable">%&#123;DATA:error_message&#125;</span>&quot;</span></span><br><span class="line">                    ]</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="string">id</span> <span class="string">=&gt;</span> <span class="string">&quot;service-exception&quot;</span></span><br><span class="line">            &#125;</span><br><span class="line">            <span class="string">mutate</span> &#123;</span><br><span class="line">                <span class="string">add_tag</span> <span class="string">=&gt;</span> [ <span class="string">&quot;service-exception&quot;</span> ]</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="string">if</span> [<span class="string">throwable</span>] &#123;</span><br><span class="line">                <span class="string">mutate</span> &#123;</span><br><span class="line">                    <span class="string">remove_field</span> <span class="string">=&gt;</span> [<span class="string">&quot;throwable&quot;</span>]</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="string">else</span> &#123;</span><br><span class="line">            <span class="string">if</span> [<span class="string">service_name</span>] <span class="string">==</span> <span class="string">&quot;lights-search-service&quot;</span> <span class="string">and</span> [<span class="string">message</span>] <span class="string">=~</span> <span class="string">&quot;LightSearchServiceImpl&quot;</span> <span class="string">and</span> [<span class="string">message</span>] <span class="string">=~</span> <span class="string">&quot; INFO &quot;</span> &#123;</span><br><span class="line">                <span class="string">grok</span> &#123;</span><br><span class="line">                    <span class="string">match</span> <span class="string">=&gt;</span> &#123;</span><br><span class="line">                        <span class="string">&quot;message&quot;</span> <span class="string">=&gt;</span> [</span><br><span class="line">                            <span class="string">&quot;<span class="template-variable">%&#123;TIMESTAMP_ISO8601:timestamp&#125;</span> \[<span class="template-variable">%&#123;DATA:thread&#125;</span>\] <span class="template-variable">%&#123;DATA:level&#125;</span> <span class="template-variable">%&#123;DATA:class&#125;</span> - <span class="template-variable">%&#123;GREEDYDATA:response_message&#125;</span>&quot;</span></span><br><span class="line">                        ]</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="string">id</span> <span class="string">=&gt;</span> <span class="string">&quot;lights-search-service&quot;</span></span><br><span class="line">                &#125;</span><br><span class="line">                <span class="string">mutate</span> &#123;</span><br><span class="line">                    <span class="string">add_tag</span> <span class="string">=&gt;</span> [ <span class="string">&quot;lights-search-service&quot;</span> ]</span><br><span class="line">                    <span class="string">remove_field</span> <span class="string">=&gt;</span> [<span class="string">&quot;message&quot;</span>]</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="string">if</span> <span class="string">&quot;lights-nginx-web&quot;</span> <span class="string">in</span> [<span class="string">tags</span>] &#123;</span><br><span class="line">        <span class="string">grok</span> &#123;</span><br><span class="line">            <span class="string">match</span> <span class="string">=&gt;</span> &#123;</span><br><span class="line">                <span class="string">&quot;message&quot;</span> <span class="string">=&gt;</span> [</span><br><span class="line">                    <span class="string">&quot;<span class="template-variable">%&#123;IPORHOST:clientip&#125;</span> <span class="template-variable">%&#123;IPORHOST:server_name&#125;</span> <span class="template-variable">%&#123;HTTPDUSER:ident&#125;</span> <span class="template-variable">%&#123;HTTPDUSER:auth&#125;</span> \[<span class="template-variable">%&#123;HTTPDATE:timestamp&#125;</span>\] \&quot;(?:<span class="template-variable">%&#123;WORD:verb&#125;</span> <span class="template-variable">%&#123;DATA:request&#125;</span>(?: HTTP/<span class="template-variable">%&#123;NUMBER:httpversion&#125;</span>)?|<span class="template-variable">%&#123;DATA:rawrequest&#125;</span>)\&quot; (?:-|<span class="template-variable">%&#123;NUMBER:status&#125;</span>) (?:-|<span class="template-variable">%&#123;NUMBER:request_time&#125;</span>) (?:-|<span class="template-variable">%&#123;NUMBER:bytes&#125;</span>) \&quot;<span class="template-variable">%&#123;DATA:http_referer&#125;</span>\&quot; \&quot;<span class="template-variable">%&#123;DATA:http_user_agent&#125;</span>\&quot; \&quot;<span class="template-variable">%&#123;DATA:http_x_forwarded_for&#125;</span>\&quot; \&quot;<span class="template-variable">%&#123;DATA:upstream_addr&#125;</span>\&quot; <span class="template-variable">%&#123;NUMBER:upstream_status&#125;</span> <span class="template-variable">%&#123;NUMBER:upstream_response_time&#125;</span>&quot;</span></span><br><span class="line">                ]</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="string">mutate</span> &#123;</span><br><span class="line">            <span class="string">remove_field</span> <span class="string">=&gt;</span> [<span class="string">&quot;message&quot;</span>]</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="string">date</span> &#123;</span><br><span class="line">        <span class="string">match</span> <span class="string">=&gt;</span> [ <span class="string">&quot;timestamp&quot;</span>, <span class="string">&quot;yyyy-MM-dd HH:mm:ss.SSS&quot;</span>, <span class="string">&quot;dd/MMM/yyyy:HH:mm:ss Z&quot;</span> ]</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="string">mutate</span> &#123;</span><br><span class="line">        <span class="string">remove_field</span> <span class="string">=&gt;</span> [<span class="string">&quot;@version&quot;</span>, <span class="string">&quot;timestamp&quot;</span>, <span class="string">&quot;agent&quot;</span>, <span class="string">&quot;input&quot;</span>]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="string">output</span> &#123;</span><br><span class="line">    <span class="comment">#stdout &#123; codec =&gt; rubydebug &#123; metadata =&gt; true &#125; &#125;</span></span><br><span class="line">    <span class="string">if</span> <span class="string">&quot;_grokparsefailure&quot;</span> <span class="string">in</span> [<span class="string">tags</span>] &#123;</span><br><span class="line">        <span class="string">file</span> &#123;</span><br><span class="line">            <span class="string">path</span> <span class="string">=&gt;</span> <span class="string">&quot;/opt/elk/logstash-7.11.2/_grokparsefailure-<span class="template-variable">%&#123;+yyyy.MM.dd&#125;</span>&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="string">else</span> &#123;</span><br><span class="line">        <span class="string">if</span> <span class="string">&quot;service-exception&quot;</span> <span class="string">in</span> [<span class="string">tags</span>] &#123;</span><br><span class="line">            <span class="string">elasticsearch</span> &#123;</span><br><span class="line">                <span class="string">hosts</span> <span class="string">=&gt;</span> [<span class="string">&quot;http://10.88.2.1:9200&quot;</span>]</span><br><span class="line">                <span class="string">index</span> <span class="string">=&gt;</span> <span class="string">&quot;lights-service-exception&quot;</span></span><br><span class="line">                <span class="string">action</span> <span class="string">=&gt;</span> <span class="string">&quot;create&quot;</span></span><br><span class="line">                <span class="string">user</span> <span class="string">=&gt;</span> <span class="string">&quot;elastic&quot;</span></span><br><span class="line">                <span class="string">password</span> <span class="string">=&gt;</span> <span class="string">&quot;xxxxx&quot;</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="string">if</span> <span class="string">&quot;lights-search-service&quot;</span> <span class="string">in</span> [<span class="string">tags</span>] &#123;</span><br><span class="line">            <span class="string">elasticsearch</span> &#123;</span><br><span class="line">                <span class="string">hosts</span> <span class="string">=&gt;</span> [<span class="string">&quot;http://10.88.2.1:9200&quot;</span>]</span><br><span class="line">                <span class="string">index</span> <span class="string">=&gt;</span> <span class="string">&quot;lights-search&quot;</span></span><br><span class="line">                <span class="comment">#document_id =&gt; &quot;%&#123;[@metadata][_id]&#125;&quot;</span></span><br><span class="line">                <span class="string">action</span> <span class="string">=&gt;</span> <span class="string">&quot;create&quot;</span></span><br><span class="line">                <span class="string">user</span> <span class="string">=&gt;</span> <span class="string">&quot;elastic&quot;</span></span><br><span class="line">                <span class="string">password</span> <span class="string">=&gt;</span> <span class="string">&quot;xxxxx&quot;</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="string">if</span> <span class="string">&quot;lights-nginx-web&quot;</span> <span class="string">in</span> [<span class="string">tags</span>] &#123;</span><br><span class="line">            <span class="string">elasticsearch</span> &#123;</span><br><span class="line">                <span class="string">hosts</span> <span class="string">=&gt;</span> [<span class="string">&quot;http://10.88.2.1:9200&quot;</span>]</span><br><span class="line">                <span class="string">index</span> <span class="string">=&gt;</span> <span class="string">&quot;lights-nginx-web&quot;</span></span><br><span class="line">                <span class="string">action</span> <span class="string">=&gt;</span> <span class="string">&quot;create&quot;</span></span><br><span class="line">                <span class="string">user</span> <span class="string">=&gt;</span> <span class="string">&quot;elastic&quot;</span></span><br><span class="line">                <span class="string">password</span> <span class="string">=&gt;</span> <span class="string">&quot;xxxxx&quot;</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="Filebeat"><a href="#Filebeat" class="headerlink" title="Filebeat"></a>Filebeat</h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Nginx日志</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">type:</span> <span class="string">log</span></span><br><span class="line">  <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">paths:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">/log/nginx/lights.log</span></span><br><span class="line">  <span class="attr">tags:</span> [<span class="string">&quot;lights-nginx&quot;</span>]</span><br><span class="line">  <span class="attr">tail_files:</span> <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Java日志(异常多行合并)</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">type:</span> <span class="string">log</span></span><br><span class="line">  <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">paths:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">/log/&lt;service-name&gt;/*.log</span></span><br><span class="line">  <span class="attr">exclude_lines:</span> [<span class="string">&#x27;/actuator/&#x27;</span>]</span><br><span class="line">  <span class="attr">exclude_files:</span> [<span class="string">&#x27;.gz$&#x27;</span>]</span><br><span class="line">  <span class="attr">tags:</span> [<span class="string">&quot;lights-service&quot;</span>]</span><br><span class="line">  <span class="attr">multiline.type:</span> <span class="string">pattern</span></span><br><span class="line">  <span class="attr">multiline.pattern:</span> <span class="string">&#x27;^\d&#123;4&#125;-\d&#123;2&#125;-\d&#123;2&#125;&#x27;</span></span><br><span class="line">  <span class="attr">multiline.negate:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">multiline.match:</span> <span class="string">after</span></span><br><span class="line">  <span class="attr">ignore_older:</span> <span class="string">6h</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="脚本：同步到Elasticsearch"><a href="#脚本：同步到Elasticsearch" class="headerlink" title="脚本：同步到Elasticsearch"></a>脚本：同步到Elasticsearch</h2><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># 判断是否有任务在执行</span></span><br><span class="line">LOCK=$(cat <span class="variable">$es_script_path</span>/.lock_<span class="variable">$file_suffix</span>)</span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$LOCK</span> -eq 1 ];<span class="keyword">then</span></span><br><span class="line">   <span class="built_in">echo</span> <span class="string">&quot;`date &quot;</span>+%Y-%m-%d %H:%M:%S<span class="string">&quot;` locked&quot;</span> &amp;&amp; <span class="built_in">exit</span> 1</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;1&quot;</span> &gt; <span class="variable">$es_script_path</span>/.lock_<span class="variable">$file_suffix</span></span><br><span class="line"></span><br><span class="line">DATE_BEGIN=$(cat <span class="variable">$es_script_path</span>/.lasttime_<span class="variable">$file_suffix</span>)</span><br><span class="line">DATE_END=`date +<span class="string">&quot;%Y-%m-%d %H:%M:%S&quot;</span>`</span><br><span class="line">DATE_BEGIN=<span class="string">&quot;2021-05-01 09:00:10&quot;</span></span><br><span class="line">DATE_END=<span class="string">&quot;2021-05-01 09:00:10&quot;</span></span><br><span class="line"></span><br><span class="line">ORDERS_SQL=<span class="string">&quot;&quot;</span><span class="string">&quot;</span></span><br><span class="line"><span class="string">select order_no from lights.order where createtime BETWEEN &#x27;<span class="variable">$DATE_BEGIN</span>&#x27; and &#x27;<span class="variable">$DATE_END</span>&#x27;</span></span><br><span class="line"><span class="string">&quot;</span><span class="string">&quot;&quot;</span></span><br><span class="line"><span class="comment"># 查询同步订单列表</span></span><br><span class="line">ORDERS_RESULT=$(mysql -u &lt;user&gt; &lt;db&gt; -e  <span class="string">&quot;<span class="variable">$ORDERS_SQL</span>&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> LINE <span class="keyword">in</span> <span class="variable">$ORDERS_RESULT</span></span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">  <span class="keyword">if</span> [ <span class="string">&#x27;order_no&#x27;</span> != <span class="string">&quot;<span class="variable">$LINE</span>&quot;</span> ];<span class="keyword">then</span></span><br><span class="line">    es_index=`<span class="built_in">echo</span> <span class="string">&quot;lights-order-20<span class="variable">$LINE</span>&quot;</span>|cut -c 1-20`</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;sync order time:<span class="variable">$DATE_BEGIN</span> ~ <span class="variable">$DATE_END</span> order no: <span class="variable">$LINE</span>, es index: <span class="variable">$es_index</span>&quot;</span></span><br><span class="line">    <span class="comment"># 调用查询接口</span></span><br><span class="line">    orderdetail_result=$(curl -XPOST -H <span class="string">&quot;Content-Type: application/json&quot;</span> -d <span class="string">&#x27;&#123;&quot;orderNo&quot;:&quot;&#x27;</span><span class="variable">$LINE</span><span class="string">&#x27;&quot;&#125;&#x27;</span> http://localhost:8080/flights-order-service/order/detail)</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;<span class="variable">$orderdetail_result</span>&quot;</span> &gt; <span class="variable">$es_script_path</span>/.data_<span class="variable">$file_suffix</span></span><br><span class="line">    <span class="comment"># 时区设置</span></span><br><span class="line">    cat <span class="variable">$es_script_path</span>/.data_<span class="variable">$file_suffix</span> |jq <span class="string">&#x27;.orderInfo&#x27;</span> -c &gt;<span class="variable">$es_script_path</span>/.data_1_<span class="variable">$file_suffix</span></span><br><span class="line">    sed -i <span class="string">&#x27;s/[0-9]\&#123;4\&#125;-[0-9]\&#123;2\&#125;-[0-9]\&#123;2\&#125; [0-9]\&#123;2\&#125;:[0-9]\&#123;2\&#125;:[0-9]\&#123;2\&#125;/&amp; +0800/g&#x27;</span> <span class="variable">$es_script_path</span>/.data_1_<span class="variable">$file_suffix</span></span><br><span class="line">    <span class="comment"># 保持到ES</span></span><br><span class="line">    curl -XPOST --user <span class="string">&#x27;elastic:&lt;password&gt;&#x27;</span> -H <span class="string">&quot;Content-Type: application/json&quot;</span> http://localhost:9200/<span class="variable">$es_index</span>/_doc/<span class="variable">$LINE</span> -d@<span class="variable">$es_script_path</span>/.data_1_<span class="variable">$file_suffix</span></span><br><span class="line">  <span class="keyword">fi</span></span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 更新同步时间 及 解锁</span></span><br><span class="line"><span class="built_in">echo</span> <span class="variable">$DATE_END</span> &gt; <span class="variable">$es_script_path</span>/.lasttime_<span class="variable">$file_suffix</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;0&quot;</span> &gt; <span class="variable">$es_script_path</span>/.lock_<span class="variable">$file_suffix</span></span><br></pre></td></tr></table></figure>
+
+
+<h2 id="小技巧"><a href="#小技巧" class="headerlink" title="小技巧"></a>小技巧</h2><h4 id="1-Logstash-Req-Resp合并成一条事件"><a href="#1-Logstash-Req-Resp合并成一条事件" class="headerlink" title="1. Logstash Req-Resp合并成一条事件"></a>1. Logstash Req-Resp合并成一条事件</h4><p>正常情况下Controller层会拦截请求参数和响应结果并输出到日志，如何基于线程ID将前后两条日志记录合并到一个事件中。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">if [service_name] == <span class="string">&quot;light-order-service&quot;</span> and [message] =~ <span class="string">&quot;LIGHT-RE&quot;</span> and [message] =~ <span class="string">&quot; INFO &quot;</span> &#123;</span><br><span class="line">    grok &#123;</span><br><span class="line">        match =&gt; &#123;</span><br><span class="line">            <span class="attr">&quot;message&quot;</span> =&gt; [</span><br><span class="line">                <span class="attr">&quot;%&#123;TIMESTAMP_ISO8601:timestamp&#125; \[%&#123;DATA:thread&#125;\] %&#123;DATA:level&#125; - LIGHT-%&#123;DATA:type&#125;-\[%&#123;DATA:class_method&#125;\] \[%&#123;DATA:username&#125;\] \[%&#123;GREEDYDATA:request&#125;\]&quot;</span>,</span><br><span class="line">                <span class="attr">&quot;%&#123;TIMESTAMP_ISO8601:timestamp&#125; \[%&#123;DATA:thread&#125;\] %&#123;DATA:level&#125; - LIGHT-%&#123;DATA:type&#125;-\[%&#123;DATA:class_method&#125;\] %&#123;GREEDYDATA:response&#125; size:%&#123;DATA:size&#125; spend:%&#123;DATA:spend&#125;ms&quot;</span></span><br><span class="line">            ]</span><br><span class="line">        &#125;</span><br><span class="line">        id =&gt; <span class="string">&quot;light-order-service&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">    if [type] == <span class="string">&quot;REQ&quot;</span> &#123;</span><br><span class="line">        aggregate &#123;</span><br><span class="line">            task_id =&gt; <span class="attr">&quot;%&#123;thread&#125;&quot;</span></span><br><span class="line">            code =&gt; <span class="attr">&quot;map[&#x27;request_timestamp&#x27;] = event.get(&#x27;timestamp&#x27;); map[&#x27;username&#x27;] = event.get(&#x27;username&#x27;); map[&#x27;request&#x27;] = event.get(&#x27;request&#x27;)&quot;</span></span><br><span class="line">            map_action =&gt; <span class="attr">&quot;create&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    if [type] == <span class="string">&quot;RESP&quot;</span> &#123;</span><br><span class="line">        aggregate &#123;</span><br><span class="line">            task_id =&gt; <span class="attr">&quot;%&#123;thread&#125;&quot;</span></span><br><span class="line">            code =&gt; <span class="attr">&quot;event.set(&#x27;request_timestamp&#x27;, map[&#x27;request_timestamp&#x27;]); event.set(&#x27;username&#x27;, map[&#x27;username&#x27;]); event.set(&#x27;request&#x27;, map[&#x27;request&#x27;])&quot;</span></span><br><span class="line">            map_action =&gt; <span class="attr">&quot;update&quot;</span></span><br><span class="line">            end_of_task =&gt; true</span><br><span class="line">            timeout =&gt; 120</span><br><span class="line">        &#125;</span><br><span class="line">        mutate &#123;</span><br><span class="line">            add_tag =&gt; [ <span class="attr">&quot;light-order-service&quot;</span> ]</span><br><span class="line">            remove_field =&gt; [<span class="attr">&quot;message&quot;</span>]</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-Kibana小技巧和注意事项"><a href="#2-Kibana小技巧和注意事项" class="headerlink" title="2. Kibana小技巧和注意事项"></a>2. Kibana小技巧和注意事项</h4><ol>
+<li><p>Kibana可视化中Lens(条形图、饼图等)，如何使用索引的另一个时间x字段统计？<br>新建一个Kibana索引，选择x字段作为时间字段。</p>
+</li>
+<li><p>Kibana可视化中Lens(条形图、饼图等)，如何像TSVB那样使用公式计算值？<br>使用Kibana索引的脚本字段，在Lens中使用</p>
+</li>
+<li><p>Kibana中Discover时间框搜索是大于等于(&gt;=)开始时间，小于(&lt;)结束时间，对时间敏感的搜索需要注意</p>
+</li>
+</ol>
+<h4 id="3-Elasticsearch时区问题"><a href="#3-Elasticsearch时区问题" class="headerlink" title="3. Elasticsearch时区问题"></a>3. Elasticsearch时区问题</h4><p>Elasticsearch存储和读取时都要带上时区</p>
+<ul>
+<li><p>Logstash存储修改UTC时间为东八区时间</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ruby &#123;</span><br><span class="line">            code =&gt; <span class="attr">&quot;event.set(&#x27;temp&#x27;, event.get(&#x27;@timestamp&#x27;).time.localtime + 8*60*60); event.set(&#x27;@timestamp&#x27;, event.get(&#x27;temp&#x27;))&quot;</span></span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>直接存储ES的时间字段要带上时区信息<code>2021-05-15 00:00:00 +0800</code></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -XPOST --user <span class="string">&#x27;elastic:xxx&#x27;</span> -H <span class="string">&quot;Content-Type: application/json&quot;</span> http://127.0.0.1:9200/es_index/_doc/<span class="variable">$LINE</span> -d@/json_data</span><br></pre></td></tr></table></figure></li>
+<li><p>Kibana搜索时带上时区</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">GET light-order/_count</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;query&quot;</span>: &#123;</span><br><span class="line">    <span class="attr">&quot;range&quot;</span>: &#123;</span><br><span class="line">      <span class="attr">&quot;@timestamp&quot;</span>: &#123;</span><br><span class="line">        <span class="attr">&quot;gte&quot;</span>: <span class="string">&quot;2021-04-15 00:00:00&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;lte&quot;</span>: <span class="string">&quot;2021-04-15 23:59:59&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;format&quot;</span>: <span class="string">&quot;yyyy-MM-dd HH:mm:ss&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;time_zone&quot;</span>:<span class="string">&quot;+08:00&quot;</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="4-设计上的原则"><a href="#4-设计上的原则" class="headerlink" title="4. 设计上的原则"></a>4. 设计上的原则</h4><p>数据清洗一定发生在写入ES之前，而不是请求数据后处理，拿势必会降低请求速度和效率。<br>让ES做他擅长的事，检索+不复杂的聚合，否则数据量+复杂的业务逻辑会有性能问题。</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.lights8080.com/2021/06/04/%E6%8A%80%E6%9C%AF/ELK/ELK-%E5%AE%9E%E8%B7%B5%E6%80%BB%E7%BB%93/" title="ELK-实践总结" target="_blank" rel="external">http://www.lights8080.com/2021/06/04/%E6%8A%80%E6%9C%AF/ELK/ELK-%E5%AE%9E%E8%B7%B5%E6%80%BB%E7%BB%93/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="http://www.lights8080.com" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="http://www.lights8080.com" target="_blank"><span class="text-dark">七路灯</span><small class="ml-1x">从事互联网开发，信奉终身成长的技术人</small></a></h3>
+        <div>人的一生应当有许多停靠站，我但愿每一个站台都有一盏雾中的灯。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="vcomments"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/2021/06/03/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E6%95%B0%E6%8D%AE%E8%BF%81%E7%A7%BB/" title="Elasticsearch-数据迁移"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo, wechat" data-mobile-sites="weibo, wechat"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lights8080" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="https://www.zhihu.com/people/lights8080" target="_blank" title="Zhihu" data-toggle=tooltip data-placement=top><i class="icon icon-zhihu"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	<!-- Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>. -->
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+
+
+
+
+   
+    
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/valine"></script>
+  <script type="text/javascript">
+  var GUEST = ['nick', 'mail', 'link'];
+  var meta = 'nick,mail,link';
+  meta = meta.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#vcomments',
+    verify: false,
+    notify: false,
+    appId: '0A4Cg4vm7SmX0sfL9lfvExSq-gzGzoHsz',
+    appKey: 'jkuwap2Fh3CKBlP1SO59uyb4',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: meta,
+    pageSize: '10' || 10,
+    visitor: true
+  });
+  </script>
+
+     
+
+
+
+
+
+
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?cd4db68d2be51fc8c3853594dc53d075";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+</body>
+</html>
