@@ -18,15 +18,15 @@
   
   
   <title>Elasticsearch-数据迁移 | 七路灯</title>
-  <meta name="description" content="Reindex数据迁移重建索引（_reindex），即：一旦索引被创建，则无法直接修改索引字段的mapping属性，必需要重建索引然后将旧的索引数据迁移到新的索引中才行（迁移过程底层使用了scroll API ），如： 示例： 123456789101112131415161718POST _reindex    &amp;#123;      &quot;conflicts&quot;: &quot;p">
+  <meta name="description" content="Reindex数据迁移重建索引（_reindex），即：一旦索引被创建，则无法直接修改索引字段的mapping属性，必需要重建索引然后将旧的索引数据迁移到新的索引中才行（迁移过程底层使用了scroll API ）。 示例： 123456789101112131415161718POST _reindex    &amp;#123;      &quot;conflicts&quot;: &quot;pro">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Elasticsearch-数据迁移">
 <meta property="og:url" content="http://www.lights8080.com/2021/06/03/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E6%95%B0%E6%8D%AE%E8%BF%81%E7%A7%BB/index.html">
 <meta property="og:site_name" content="七路灯">
-<meta property="og:description" content="Reindex数据迁移重建索引（_reindex），即：一旦索引被创建，则无法直接修改索引字段的mapping属性，必需要重建索引然后将旧的索引数据迁移到新的索引中才行（迁移过程底层使用了scroll API ），如： 示例： 123456789101112131415161718POST _reindex    &amp;#123;      &quot;conflicts&quot;: &quot;p">
+<meta property="og:description" content="Reindex数据迁移重建索引（_reindex），即：一旦索引被创建，则无法直接修改索引字段的mapping属性，必需要重建索引然后将旧的索引数据迁移到新的索引中才行（迁移过程底层使用了scroll API ）。 示例： 123456789101112131415161718POST _reindex    &amp;#123;      &quot;conflicts&quot;: &quot;pro">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2021-06-02T16:00:00.000Z">
-<meta property="article:modified_time" content="2021-06-03T12:30:14.000Z">
+<meta property="article:modified_time" content="2021-06-07T07:04:19.000Z">
 <meta property="article:author" content="七路灯">
 <meta property="article:tag" content="技术">
 <meta property="article:tag" content="ELK">
@@ -238,7 +238,7 @@
                 <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
               </p>
               <p class="item-title">
-                <a href="/2021/06/04/%E6%8A%80%E6%9C%AF/ELK/ELK-%E5%AE%9E%E8%B7%B5%E6%80%BB%E7%BB%93/" class="title">ELK-实践总结</a>
+                <a href="/2021/06/04/%E6%8A%80%E6%9C%AF/ELK/ELK-%E5%AE%9E%E8%B7%B5%EF%BC%88%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B&%E9%85%8D%E7%BD%AE%E8%BF%87%E7%A8%8B%EF%BC%89/" class="title">ELK-实践（数据模型&amp;配置过程）</a>
               </p>
               <p class="item-date">
                 <time datetime="2021-06-03T16:00:00.000Z" itemprop="datePublished">2021-06-04</time>
@@ -363,7 +363,7 @@
         <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/06/03/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E6%95%B0%E6%8D%AE%E8%BF%81%E7%A7%BB/#comments" class="article-comment-link">评论</a></span>
         
 	
-		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 240(字)</span>
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 239(字)</span>
 	
 	
 		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 1(分)</span>
@@ -373,7 +373,7 @@
     </div>
     <div class="article-entry marked-body" itemprop="articleBody">
       
-        <h2 id="Reindex数据迁移"><a href="#Reindex数据迁移" class="headerlink" title="Reindex数据迁移"></a>Reindex数据迁移</h2><p>重建索引（_reindex），即：一旦索引被创建，则无法直接修改索引字段的mapping属性，必需要重建索引然后将旧的索引数据迁移到新的索引中才行（迁移过程底层使用了scroll API ），如：</p>
+        <h2 id="Reindex数据迁移"><a href="#Reindex数据迁移" class="headerlink" title="Reindex数据迁移"></a>Reindex数据迁移</h2><p>重建索引（_reindex），即：一旦索引被创建，则无法直接修改索引字段的mapping属性，必需要重建索引然后将旧的索引数据迁移到新的索引中才行（迁移过程底层使用了scroll API ）。</p>
 <p>示例：</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">POST _reindex</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="string">&quot;conflicts&quot;</span>: <span class="string">&quot;proceed&quot;</span>, <span class="comment"># 发生冲突继续执行</span></span><br><span class="line">      <span class="string">&quot;source&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;index&quot;</span>: <span class="string">&quot;old_index&quot;</span>,</span><br><span class="line">        <span class="string">&quot;type&quot;</span>: <span class="string">&quot;_doc&quot;</span>,</span><br><span class="line">        <span class="string">&quot;size&quot;</span>: 5000, <span class="comment"># 设置每批迁移的文档记录数</span></span><br><span class="line">        <span class="string">&quot;_source&quot;</span>: [<span class="string">&quot;user&quot;</span>, <span class="string">&quot;_doc&quot;</span>], <span class="comment"># 可设置要迁移的索引字段，不设置则默认所有字段</span></span><br><span class="line">        <span class="string">&quot;query&quot;</span>: &#123; <span class="comment"># 可设置要迁移的文档记录过滤条件</span></span><br><span class="line">          <span class="string">&quot;match_all&quot;</span>: &#123; &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="string">&quot;dest&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;index&quot;</span>: <span class="string">&quot;new_index&quot;</span>,</span><br><span class="line">        <span class="string">&quot;type&quot;</span>: <span class="string">&quot;_doc&quot;</span>,</span><br><span class="line">        <span class="string">&quot;version_type&quot;</span>: <span class="string">&quot;internal&quot;</span> <span class="comment"># &quot;internal&quot;或者不设置，则Elasticsearch强制性的将文档转储到目标中，覆盖具有相同类型和ID的任何内容</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
       
@@ -431,7 +431,7 @@
   <ul class="pager pull-left">
     
     <li class="prev">
-      <a href="/2021/06/04/%E6%8A%80%E6%9C%AF/ELK/ELK-%E5%AE%9E%E8%B7%B5%E6%80%BB%E7%BB%93/" title="ELK-实践总结"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+      <a href="/2021/06/04/%E6%8A%80%E6%9C%AF/ELK/ELK-%E5%AE%9E%E8%B7%B5%EF%BC%88%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B&%E9%85%8D%E7%BD%AE%E8%BF%87%E7%A8%8B%EF%BC%89/" title="ELK-实践（数据模型&amp;配置过程）"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
     </li>
     
     
