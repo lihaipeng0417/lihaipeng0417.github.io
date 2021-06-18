@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>ElastAlert-实践 | 七路灯</title>
+  <meta name="description" content="一、Alerting With Elasticsearch ElastAlert是一个简单的框架，用于从Elasticsearch中的数据中发出异常，尖峰或其他感兴趣的模式的警报。  它通过将Elasticsearch与两种类型的组件（规则类型和警报）结合使用。定期查询Elasticsearch，并将数据传递到规则类型，该规则类型确定找到任何匹配项。发生匹配时，它会发出一个或多个警报，这些警报">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ElastAlert-实践">
+<meta property="og:url" content="http://www.lights8080.com/2021/06/17/%E6%8A%80%E6%9C%AF/ELK/ElastAlert-%E5%AE%9E%E8%B7%B5/index.html">
+<meta property="og:site_name" content="七路灯">
+<meta property="og:description" content="一、Alerting With Elasticsearch ElastAlert是一个简单的框架，用于从Elasticsearch中的数据中发出异常，尖峰或其他感兴趣的模式的警报。  它通过将Elasticsearch与两种类型的组件（规则类型和警报）结合使用。定期查询Elasticsearch，并将数据传递到规则类型，该规则类型确定找到任何匹配项。发生匹配时，它会发出一个或多个警报，这些警报">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lights8080/lights8080-oss/raw/master/2021/06/xZ1jbI.jpg">
+<meta property="article:published_time" content="2021-06-16T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-06-17T05:54:28.000Z">
+<meta property="article:author" content="七路灯">
+<meta property="article:tag" content="技术">
+<meta property="article:tag" content="ELK">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lights8080/lights8080-oss/raw/master/2021/06/xZ1jbI.jpg">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.lights8080.com/2021/06/17/%E6%8A%80%E6%9C%AF/ELK/ElastAlert-%E5%AE%9E%E8%B7%B5/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="七路灯" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="../images/favicon.ico" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="http://www.lights8080.com" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">七路灯</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">从事互联网开发，信奉终身成长的技术人</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Beijing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lights8080" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="https://www.zhihu.com/people/lights8080" target="_blank" title="Zhihu" data-toggle=tooltip data-placement=top><i class="icon icon-zhihu"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎关注公众号共同交流学习!</p>
+            </div>
+            <div class="content">
+                <img src="/../images/gongzhonghao-qrcode.jpg" alt="site.qrcode_alt" title="site.qrcode_title" />
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/">人体系统</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%B7%A5%E5%85%B7/">工具</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><span class="category-list-count">30</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a><span class="category-list-count">22</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/JVM/">JVM</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/Linux/">Linux</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/SpringCloud/">SpringCloud</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/%E5%89%8D%E7%AB%AF/">前端</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%9D%82%E8%B0%88/">杂谈</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%AF%AD%E5%BD%95/">语录</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/ELK/" rel="tag">ELK</a><span class="tag-list-count">22</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Elasticsearch/" rel="tag">Elasticsearch</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Filebeat/" rel="tag">Filebeat</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/" rel="tag">Hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/" rel="tag">JVM</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Kibana/" rel="tag">Kibana</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Logstash/" rel="tag">Logstash</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/" rel="tag">Nginx</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NodeJs/" rel="tag">NodeJs</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Python/" rel="tag">Python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SpringCloud/" rel="tag">SpringCloud</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/" rel="tag">个人博客</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/" rel="tag">人体系统</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag">技术</a><span class="tag-list-count">28</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%88%E7%8E%87/" rel="tag">效率</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%9D%82%E8%B0%88/" rel="tag">杂谈</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%9D%8E%E6%B0%B8%E4%B9%90%E8%80%81%E5%B8%88/" rel="tag">李永乐老师</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BA%BF%E4%B8%8A%E9%97%AE%E9%A2%98%E5%A4%84%E7%90%86/" rel="tag">线上问题处理</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BE%8E%E5%9B%BD%E4%B8%AA%E4%BA%BA%E6%94%AF%E7%A5%A8/" rel="tag">美国个人支票</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AF%AD%E5%BD%95/" rel="tag">语录</a><span class="tag-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/ELK/" style="font-size: 13.83px;">ELK</a> <a href="/tags/Elasticsearch/" style="font-size: 13.67px;">Elasticsearch</a> <a href="/tags/Filebeat/" style="font-size: 13.17px;">Filebeat</a> <a href="/tags/Hexo/" style="font-size: 13px;">Hexo</a> <a href="/tags/JVM/" style="font-size: 13.17px;">JVM</a> <a href="/tags/Kibana/" style="font-size: 13px;">Kibana</a> <a href="/tags/Linux/" style="font-size: 13.33px;">Linux</a> <a href="/tags/Logstash/" style="font-size: 13.17px;">Logstash</a> <a href="/tags/Nginx/" style="font-size: 13px;">Nginx</a> <a href="/tags/NodeJs/" style="font-size: 13px;">NodeJs</a> <a href="/tags/Python/" style="font-size: 13px;">Python</a> <a href="/tags/SpringCloud/" style="font-size: 13px;">SpringCloud</a> <a href="/tags/%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/" style="font-size: 13px;">个人博客</a> <a href="/tags/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/" style="font-size: 13px;">人体系统</a> <a href="/tags/%E6%8A%80%E6%9C%AF/" style="font-size: 14px;">技术</a> <a href="/tags/%E6%95%88%E7%8E%87/" style="font-size: 13px;">效率</a> <a href="/tags/%E6%9D%82%E8%B0%88/" style="font-size: 13.17px;">杂谈</a> <a href="/tags/%E6%9D%8E%E6%B0%B8%E4%B9%90%E8%80%81%E5%B8%88/" style="font-size: 13px;">李永乐老师</a> <a href="/tags/%E7%BA%BF%E4%B8%8A%E9%97%AE%E9%A2%98%E5%A4%84%E7%90%86/" style="font-size: 13.5px;">线上问题处理</a> <a href="/tags/%E7%BE%8E%E5%9B%BD%E4%B8%AA%E4%BA%BA%E6%94%AF%E7%A5%A8/" style="font-size: 13px;">美国个人支票</a> <a href="/tags/%E8%AF%AD%E5%BD%95/" style="font-size: 13.33px;">语录</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">12</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">13</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">三月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/Linux/">Linux</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/06/18/%E6%8A%80%E6%9C%AF/Linux/Linux%20Shell/" class="title">Linux Shell</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-06-17T16:00:00.000Z" itemprop="datePublished">2021-06-18</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/06/18/%E6%8A%80%E6%9C%AF/%E5%85%B6%E4%BB%96/pyenv%20for%20Mac/" class="title">pyenv for Mac</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-06-17T16:00:00.000Z" itemprop="datePublished">2021-06-18</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/06/17/%E6%8A%80%E6%9C%AF/ELK/ElastAlert-%E5%AE%9E%E8%B7%B5/" class="title">ElastAlert-实践</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-06-16T16:00:00.000Z" itemprop="datePublished">2021-06-17</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/06/10/%E6%8A%80%E6%9C%AF/ELK/ElastAlert-%E6%A0%B8%E5%BF%83%E9%80%BB%E8%BE%91%E6%B5%81%E7%A8%8B%E5%8F%8A%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" class="title">ElastAlert-核心逻辑流程及源码解析</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-06-09T16:00:00.000Z" itemprop="datePublished">2021-06-10</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E5%B7%A5%E5%85%B7/">工具</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/06/08/%E5%B7%A5%E5%85%B7/Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2%E7%B3%BB%E7%BB%9F/" class="title">Hexo搭建个人博客系统</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-06-07T16:00:00.000Z" itemprop="datePublished">2021-06-08</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-技术/ELK/ElastAlert-实践" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      ElastAlert-实践
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/06/17/%E6%8A%80%E6%9C%AF/ELK/ElastAlert-%E5%AE%9E%E8%B7%B5/" class="article-date">
+	  <time datetime="2021-06-16T16:00:00.000Z" itemprop="datePublished">2021-06-17</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a>►<a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/ELK/" rel="tag">ELK</a>, <a class="article-tag-link-link" href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag">技术</a>
+  </span>
+
+
+        
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2021/06/17/%E6%8A%80%E6%9C%AF/ELK/ElastAlert-%E5%AE%9E%E8%B7%B5/" class="leancloud_visitors"  data-flag-title="ElastAlert-实践">
+			<span class="leancloud-visitors-count">0</span>
+		</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/06/17/%E6%8A%80%E6%9C%AF/ELK/ElastAlert-%E5%AE%9E%E8%B7%B5/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 2.6k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 10(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <span id="more"></span>
+
+<h2 id="一、Alerting-With-Elasticsearch"><a href="#一、Alerting-With-Elasticsearch" class="headerlink" title="一、Alerting With Elasticsearch"></a>一、Alerting With Elasticsearch</h2><blockquote>
+<p>ElastAlert是一个简单的框架，用于从Elasticsearch中的数据中发出异常，尖峰或其他感兴趣的模式的警报。</p>
+</blockquote>
+<p>它通过将Elasticsearch与两种类型的组件（规则类型和警报）结合使用。定期查询Elasticsearch，并将数据传递到规则类型，该规则类型确定找到任何匹配项。发生匹配时，它会发出一个或多个警报，这些警报根据不同的类型采取相应的措施。</p>
+<p>ElastAlert由一组规则配置，每个规则定义一个查询，一个规则类型和一组警报。</p>
+<h3 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h3><ul>
+<li>架构简单，定制灵活</li>
+<li>支持多种匹配规则（频率、阈值、数据变化、黑白名单、变化率等）</li>
+<li>支持多种警报类型（邮件、HTTP POST、自定义脚本等）</li>
+<li>匹配项汇总报警，重复警报抑制，报警失败重试和过期</li>
+<li>可用性强，状态信息保存到Elasticsearch的索引中</li>
+<li>过程的调试和审计等</li>
+</ul>
+<h3 id="可用性（Reliability）"><a href="#可用性（Reliability）" class="headerlink" title="可用性（Reliability）"></a>可用性（Reliability）</h3><ul>
+<li>ElastAlert 将其状态保存到 Elasticsearch，启动后，将恢复之前停止的状态</li>
+<li>如果 Elasticsearch 没有响应，ElastAlert 将等到恢复后才继续</li>
+<li>抛出错误的警报可能会在一段时间内自动重试</li>
+</ul>
+<h3 id="模块性（Modularity）"><a href="#模块性（Modularity）" class="headerlink" title="模块性（Modularity）"></a>模块性（Modularity）</h3><p>ElastAlert具有三个主要组件（规则类型、警报、增强），可以作为模块导入和定制。</p>
+<ul>
+<li><p>规则类型（Rule Types）<br>规则类型负责处理从Elasticsearch返回的数据。它会使用规则配置进行初始化，传递通过规则过滤器查询Elasticsearch返回的数据，并根据此数据输出匹配项。</p>
+</li>
+<li><p>警报（Alerts）<br>警报负责根据匹配采取行动。匹配项通常是一个字典，其中包含Elasticsearch中文档中的值，但可以包含由规则类型添加的任意数据。</p>
+</li>
+<li><p>增强（Enhancements）<br>增强功能是一种拦截警报并以某种方式对其进行修改或增强的方法。在将其提供给警报器之前，将它们传递给匹配字典。</p>
+</li>
+</ul>
+<h2 id="二、Running-ElastAlert"><a href="#二、Running-ElastAlert" class="headerlink" title="二、Running ElastAlert"></a>二、Running ElastAlert</h2><blockquote>
+<p>安装、命令、测试规则、运行</p>
+</blockquote>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Python3.6安装</span></span><br><span class="line">$ wget https://www.python.org/ftp/python/3.6.9/Python-3.6.9.tgz</span><br><span class="line">$ tar -zxvf Python-3.6.9.tgz</span><br><span class="line">$ <span class="built_in">cd</span> Python-3.6.9</span><br><span class="line">$ ./configure</span><br><span class="line">$ make &amp;&amp; make install</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查Python版本</span></span><br><span class="line">$ python3 -V</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装</span></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/Yelp/elastalert.git</span><br><span class="line"></span><br><span class="line">$ wget https://github.com/daichi703n/elastalert/archive/refs/heads/fix/initialize_alerts_sent.zip</span><br><span class="line"></span><br><span class="line">$ <span class="built_in">cd</span> elastalert/</span><br><span class="line">$ pip3 install <span class="string">&quot;setuptools&gt;=11.3&quot;</span></span><br><span class="line">$ python3 ./setup.py install</span><br><span class="line"></span><br><span class="line"><span class="comment"># 报错（pip:No module named setuptools_rust）解决办法</span></span><br><span class="line">$ pip3 install setuptools-rust</span><br><span class="line"></span><br><span class="line">$ pip3 install <span class="string">&quot;elasticsearch&gt;=5.0.0&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="命令"><a href="#命令" class="headerlink" title="命令"></a>命令</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建索引</span></span><br><span class="line">$ elastalert-create-index</span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试Rule，24小时内以调试模式运行。--config：指定配置文件</span></span><br><span class="line">$ elastalert-test-rule example_rules/example_frequency.yaml</span><br><span class="line"><span class="comment"># 或</span></span><br><span class="line">$ python3 -m elastalert.elastalert --config ./config.yaml --rule rules/service_exception.yaml --start 2021-05-16T00:00:00+08:00 --debug --es_debug</span><br><span class="line"></span><br><span class="line"><span class="comment"># 后台运行</span></span><br><span class="line">nohup python3 -m elastalert.elastalert --config ./config.yaml --verbose --rule ./your_rule.yaml &gt;&gt; ./elastalert.log 2&gt;&amp;1 &amp;</span><br></pre></td></tr></table></figure>
+
+<h4 id="测试规则（Testing-Rule）"><a href="#测试规则（Testing-Rule）" class="headerlink" title="测试规则（Testing Rule）"></a>测试规则（Testing Rule）</h4><p>可以在调试模式下运行ElastAlert，也可以使用elastalert-test-rule（该脚本可以简化测试的各个方面）</p>
+<p>功能：</p>
+<ul>
+<li>检查配置文件是否加载成功</li>
+<li>检查Elasticsearch过滤器是否解析</li>
+<li>与最后的X天(s)运行，显示匹配您的过滤器的点击数</li>
+<li>在一个结果中显示可用的术语</li>
+<li>保存返回到JSON文件的文档</li>
+<li>使用JSON文件或Elasticsearch的实际结果运行ElastAlert</li>
+<li>打印调试警报或触发真实警报</li>
+<li>如果存在，则检查结果中是否包含primary_key、compare_key和include术语</li>
+<li>显示将要写入elastalert_status的元数据文档</li>
+</ul>
+<p>参数：</p>
+<ul>
+<li>–schema-only：只对文件执行验证</li>
+<li>–count-only：仅查找匹配文档的数量并列出可用字段</li>
+<li>–days N：指定针对最近的N天运行，默认1天</li>
+<li>–save-json FILE：将所有下载的文档保存为JSON文件</li>
+<li>–data FILE：使用JSON文件代替Elasticsearch作为数据源</li>
+<li>–alert：触发实际警报，而不是调试（日志文本）警报</li>
+<li>–formatted-output：以格式化的JSON输出结果。</li>
+</ul>
+<h4 id="运行（Running-ElastAlert）"><a href="#运行（Running-ElastAlert）" class="headerlink" title="运行（Running ElastAlert）"></a>运行（Running ElastAlert）</h4><p>有两种运行ElastAlert的方法。作为守护程序或直接与Python一起使用（$ python3 elastalert/elastalert.py）。</p>
+<p>参数：</p>
+<ul>
+<li>–config：指定要使用的配置文件，默认值为config.yaml</li>
+<li>–debug：debug模式；1.增加日志记录的详细程度，2.将所有的报警更改为DebugAlerter，抑制它们正常的报警行为，3.跳过写入查询和警报的元数据到Elasticsearch</li>
+<li>–verbose：将增加日志记录的详细程度，与–debug不兼容</li>
+<li>–start <timestamp>：强制从指定的时间查询，而不是当前时间。如：2021-05-16T00:00:00+08:00</li>
+<li>–end <timestamp>：将强制在指定时间之后停止查询，默认到当前时间</li>
+<li>–rule &lt;rule.yaml&gt;：只运行给定的规则</li>
+<li>–silence <unit>=<number>：将使给定规则的警报静音一段时间。该规则必须使用–rule指定</li>
+<li>–es_debug：启用对Elasticsearch进行的所有查询的日志记录。</li>
+<li>–es_debug_trace &lt;trace.log&gt;：将启用将对Elasticsearch进行的所有查询的curl命令记录到指定的日志文件</li>
+<li>–pin_rules：禁用动态加载规则</li>
+</ul>
+<h2 id="三、Rule-Types-and-Configuration-Options"><a href="#三、Rule-Types-and-Configuration-Options" class="headerlink" title="三、Rule Types and Configuration Options"></a>三、Rule Types and Configuration Options</h2><blockquote>
+<p>规则类型、配置项、报警配合<br><a target="_blank" rel="noopener" href="https://elastalert.readthedocs.io/en/stable/ruletypes.html">https://elastalert.readthedocs.io/en/stable/ruletypes.html</a></p>
+</blockquote>
+<p>详细请看源码文件elastalert/schema.yaml</p>
+<h3 id="Rule-Types"><a href="#Rule-Types" class="headerlink" title="Rule Types"></a>Rule Types</h3><ul>
+<li>frequency：频率；在给定时间范围内至少有一定数量的事件时，此规则匹配<ul>
+<li>num_events：触发警报的事件数</li>
+<li>timeframe：事件数必须发生在的此时间段内，触发报警</li>
+<li>use_count_query：使用count API轮询Elasticsearch</li>
+</ul>
+</li>
+<li>any：任意；过滤器每次匹配都会警报</li>
+<li>blacklist：黑名单；将对照黑名单检查某个字段，如果该字段在黑名单中，则进行匹配<ul>
+<li>compare_key： 用于与黑名单进行比较的字段的名称，如果字段为null，那么这些事件将被忽略</li>
+<li>blacklist：黑名单值的列表</li>
+</ul>
+</li>
+<li>whitelist：白名单；与黑名单类似</li>
+<li>change：变动；将监视特定字段，并在该字段发生更改时进行匹配<ul>
+<li>compare_key：要监视更改的字段的名称</li>
+<li>ignore_null：如果为true，则没有compare_key字段的事件将不会计为已更改</li>
+<li>query_key：对每个query_key的唯一值分别计数。</li>
+<li>timeframe: 可选；时间范围，两次更改之间的最长时间。在这段时间之后，ElastAlert将忘记compare_key字段的旧值</li>
+</ul>
+</li>
+<li>spike：突刺；当给定时间段内的事件量是前一时间段内的spike_height倍数时，此规则匹配<ul>
+<li>spike_height：上一个时间范围内的事件数量与前一个时间范围内的事件数量之比，匹配时触发警报</li>
+<li>spike_type：‘up’, ‘down’ or ‘both’</li>
+<li>timeframe：当前窗口和参考窗口的时间范围</li>
+<li>field_value：可选；使用文档中字段的值而不是匹配文档的数量</li>
+<li>threshold_ref：参考窗口中必须存在的最少数量的事件才能触发警报</li>
+<li>threshold_cur：当前窗口中必须存在的最小数量的事件才能触发警报</li>
+</ul>
+</li>
+<li>flatline：阈值；当事件总数在一个时间段内低于给定阈值时，此规则匹配<ul>
+<li>threshold：不触发警报的最小事件数</li>
+<li>timeframe：时间范围</li>
+</ul>
+</li>
+<li>new_term：新值；当新值出现在以前从未见过的字段中时，此规则匹配<ul>
+<li>fields：监视字段列表</li>
+</ul>
+</li>
+<li>cardinality：基数阈值；当时间范围内某个字段的唯一值的总数大于或小于阈值时，此规则匹配<ul>
+<li>cardinality_field：要计算基数的字段</li>
+<li>timeframe：时间范围</li>
+</ul>
+</li>
+<li>metric_aggregation：当计算窗口中的度量值高于或低于阈值时，此规则匹配<ul>
+<li>metric_agg_key：指标字段</li>
+<li>metric_agg_type：指标类型，‘min’, ‘max’, ‘avg’, ‘sum’, ‘cardinality’, ‘value_count’</li>
+<li>max_threshold：最大阈值</li>
+<li>min_threshold：最小阈值</li>
+</ul>
+</li>
+<li>spike_aggregation：当计算窗口中某个指标的值是spike_height乘以比前一个时间段大或小时，该规则匹配<ul>
+<li>metric_agg_key：指标字段</li>
+<li>metric_agg_type：指标类型，‘min’, ‘max’, ‘avg’, ‘sum’, ‘cardinality’, ‘value_count’</li>
+<li>spike_height：上一个时间范围内的事件数量与前一个时间范围内的事件数量之比，匹配时触发警报</li>
+<li>spike_type：‘up’, ‘down’ or ‘both’</li>
+<li>buffer_time：当前窗口和参考窗口的时间范围</li>
+<li>query_key：按字段分组</li>
+<li>metric_agg_script：计算指标脚本</li>
+<li>threshold_ref：参考窗口中用于触发警报的指标的最小值</li>
+<li>threshold_cur：当前窗口中用于触发警报的指标的最小值</li>
+<li>min_doc_count：当前窗口中触发警报所需的最小事件数</li>
+</ul>
+</li>
+<li>percentage_match：当计算窗口内匹配桶中文档的百分比高于或低于阈值时，此规则匹配<ul>
+<li>match_bucket_filter：匹配桶定义了一个过滤器</li>
+<li>min_percentage：匹配文档的百分比小于此数字，则会触发警报</li>
+<li>max_percentage：匹配文档的百分比大于此数字，则会触发警报</li>
+</ul>
+</li>
+</ul>
+<p><img src="https://gitee.com/lights8080/lights8080-oss/raw/master/2021/06/xZ1jbI.jpg" alt="IMAGE"></p>
+<h3 id="Alerts"><a href="#Alerts" class="headerlink" title="Alerts"></a>Alerts</h3><p>每个规则都可以附加任何数量的警报。每个警报器的选项既可以定义在yaml文件，也可以嵌套在警报名称中，允许同一警报器的多个不同设置。</p>
+<ul>
+<li>Command：命令报警，并从匹配项中传递参数</li>
+<li>Email：邮件报警</li>
+<li>Http Post：URL报警</li>
+<li>… </li>
+</ul>
+<p>示例：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">API</span> <span class="string">not</span> <span class="number">200</span></span><br><span class="line"><span class="attr">index:</span> <span class="string">sg-access-*</span></span><br><span class="line"><span class="attr">type:</span> <span class="string">frequency</span></span><br><span class="line"><span class="attr">num_events:</span> <span class="number">20</span></span><br><span class="line"><span class="attr">timeframe:</span></span><br><span class="line">  <span class="attr">minutes:</span> <span class="number">1</span></span><br><span class="line"><span class="attr">filter:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">query:</span></span><br><span class="line">    <span class="attr">query_string:</span></span><br><span class="line">      <span class="attr">query:</span> <span class="string">&quot;NOT statusCode: 200&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">alert:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">command</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">debug</span></span><br><span class="line"></span><br><span class="line"><span class="attr">command:</span> [<span class="string">&quot;python3&quot;</span>, <span class="string">&quot;/opt/elastalert/weixin.py&quot;</span>, <span class="string">&quot;生产环境报警，报警:&quot;</span>, <span class="string">&quot;接口&#123;orgPathName&#125; 出现状态码&#123;statusCode&#125;频率高！&quot;</span>,<span class="string">&quot;服务 IP: &#123;directBackServer&#125;; 服务端口：&#123;port&#125;&quot;</span>]</span><br></pre></td></tr></table></figure>
+
+<h2 id="四、ElastAlert-Metadata-Index"><a href="#四、ElastAlert-Metadata-Index" class="headerlink" title="四、ElastAlert Metadata Index"></a>四、ElastAlert Metadata Index</h2><p>ElastAlert使用Elasticsearch来存储有关其状态的各种信息。这不仅可以对ElastAlert的操作进行某种程度的审核和调试，还可以避免在ElastAlert关闭，重新启动或崩溃时丢失数据或重复警报。Elasticsearch群集和索引信息在全局配置文件中使用es_host，es_port和writeback_index进行定义。ElastAlert必须能够写入此索引。脚本elastalert-create-index将为您创建具有正确映射的索引，并可以选择从现有ElastAlert回写索引中复制文档。</p>
+<p>ElastAlert将在回写索引（writeback index）中创建三种不同类型的文档。</p>
+<h4 id="elastalert-status"><a href="#elastalert-status" class="headerlink" title="elastalert_status"></a>elastalert_status</h4><blockquote>
+<p>记录规则的查询执行日志</p>
+</blockquote>
+<p>elastalert_status是ElastAlert在确定其首次开始时要使用的时间范围，以避免重复查询。对于每个规则，它将从最近的结束时间开始查询。如果ElastAlert在调试模式下运行，它仍将通过查找最近执行的搜索来尝试基于其开始时间，但不会将任何查询的结果写回到Elasticsearch。</p>
+<h4 id="elastalert"><a href="#elastalert" class="headerlink" title="elastalert"></a>elastalert</h4><blockquote>
+<p>记录触发的每个警报信息日志</p>
+</blockquote>
+<h4 id="elastalert-error"><a href="#elastalert-error" class="headerlink" title="elastalert_error"></a>elastalert_error</h4><blockquote>
+<p>当ElastAlert中发生错误时，它将同时写入Elasticsearch和stderr</p>
+</blockquote>
+<h4 id="silence"><a href="#silence" class="headerlink" title="silence"></a>silence</h4><blockquote>
+<p>记录何时将抑制给定规则的警报的日志</p>
+</blockquote>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://elastalert.readthedocs.io/en/stable/index.html">ElastAlert</a><br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/evescn/p/13098343.html">elastalert搭建</a><br><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/e6281cf72e95/">ElastAlert安装与使用</a></p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.lights8080.com/2021/06/17/%E6%8A%80%E6%9C%AF/ELK/ElastAlert-%E5%AE%9E%E8%B7%B5/" title="ElastAlert-实践" target="_blank" rel="external">http://www.lights8080.com/2021/06/17/%E6%8A%80%E6%9C%AF/ELK/ElastAlert-%E5%AE%9E%E8%B7%B5/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="http://www.lights8080.com" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="http://www.lights8080.com" target="_blank"><span class="text-dark">七路灯</span><small class="ml-1x">从事互联网开发，信奉终身成长的技术人</small></a></h3>
+        <div>人的一生应当有许多停靠站，我但愿每一个站台都有一盏雾中的灯。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="vcomments"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/06/18/%E6%8A%80%E6%9C%AF/%E5%85%B6%E4%BB%96/pyenv%20for%20Mac/" title="pyenv for Mac"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2021/06/10/%E6%8A%80%E6%9C%AF/ELK/ElastAlert-%E6%A0%B8%E5%BF%83%E9%80%BB%E8%BE%91%E6%B5%81%E7%A8%8B%E5%8F%8A%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" title="ElastAlert-核心逻辑流程及源码解析"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo, wechat" data-mobile-sites="weibo, wechat"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lights8080" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="https://www.zhihu.com/people/lights8080" target="_blank" title="Zhihu" data-toggle=tooltip data-placement=top><i class="icon icon-zhihu"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	<!-- Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>. -->
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+
+
+
+
+   
+    
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/valine"></script>
+  <script type="text/javascript">
+  var GUEST = ['nick', 'mail', 'link'];
+  var meta = 'nick,mail,link';
+  meta = meta.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#vcomments',
+    verify: false,
+    notify: false,
+    appId: '0A4Cg4vm7SmX0sfL9lfvExSq-gzGzoHsz',
+    appKey: 'jkuwap2Fh3CKBlP1SO59uyb4',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: meta,
+    pageSize: '10' || 10,
+    visitor: true
+  });
+  </script>
+
+     
+
+
+
+
+
+
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?d3fc7929daaac13ce6f82be8d6f62525";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+</body>
+</html>
