@@ -17,19 +17,22 @@
   <meta http-equiv="window-target" content="_top" />
   
   
-  <title>七路灯</title>
-  <meta name="description" content="人的一生应当有许多停靠站，但愿每一个站台都有一盏雾中的灯。">
-<meta property="og:type" content="website">
-<meta property="og:title" content="七路灯">
-<meta property="og:url" content="http://www.lights8080.com/page/4/index.html">
+  <title>ELK-实践20210629 | 七路灯</title>
+  <meta name="description" content="复合聚合按计数排序，TSVB使用脚本字段，滚动升级，Elastic中国社区官方博客">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ELK-实践20210629">
+<meta property="og:url" content="http://www.lights8080.com/2021/06/29/%E6%8A%80%E6%9C%AF/ELK/ELK-%E5%AE%9E%E8%B7%B520210629/index.html">
 <meta property="og:site_name" content="七路灯">
-<meta property="og:description" content="人的一生应当有许多停靠站，但愿每一个站台都有一盏雾中的灯。">
+<meta property="og:description" content="复合聚合按计数排序，TSVB使用脚本字段，滚动升级，Elastic中国社区官方博客">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-06-28T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-06-29T09:39:49.000Z">
 <meta property="article:author" content="七路灯">
-<meta property="article:tag" content="七路灯">
+<meta property="article:tag" content="技术">
+<meta property="article:tag" content="ELK">
 <meta name="twitter:card" content="summary">
   <!-- Canonical links -->
-  <link rel="canonical" href="http://www.lights8080.com/page/4/index.html">
+  <link rel="canonical" href="http://www.lights8080.com/2021/06/29/%E6%8A%80%E6%9C%AF/ELK/ELK-%E5%AE%9E%E8%B7%B520210629/index.html">
   
     <link rel="alternate" href="/atom.xml" title="七路灯" type="application/atom+xml">
   
@@ -312,538 +315,171 @@
 </aside>
 
   
-  <main class="main" role="main">
   
-  <div class="content article-list">
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-技术/ELK/ELK-实践20210629" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
     
-      <article class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
-  <div class="article-header">
-    
+    <div class="article-header">
+      
+        
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/04/27/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E5%AE%89%E5%85%A8%E7%89%B9%E6%80%A7%EF%BC%88Security%EF%BC%89/">Elasticsearch-安全特性（Security）</a>
+    <h1 class="article-title" itemprop="name">
+      ELK-实践20210629
     </h1>
   
 
-  </div>
-  
-  <div class="article-entry text-muted" itemprop="description">
-    <blockquote>
-<p>Elasticsearch安全特性，介绍加密通讯的基本原理、开启安全特性的操作步骤、如何生成节点证书、用户认证和相关概念等。<br> 基于7.11版本。</p>
-</blockquote>
-  </div>
-  
-  <p class="article-meta">
-    <span class="article-date">
+      
+      <div class="article-meta">
+        <span class="article-date">
     <i class="icon icon-calendar-check"></i>
-	<a href="/2021/04/27/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E5%AE%89%E5%85%A8%E7%89%B9%E6%80%A7%EF%BC%88Security%EF%BC%89/" class="article-date">
-	  <time datetime="2021-04-26T16:00:00.000Z" itemprop="datePublished">4月 27</time>
+	<a href="/2021/06/29/%E6%8A%80%E6%9C%AF/ELK/ELK-%E5%AE%9E%E8%B7%B520210629/" class="article-date">
+	  <time datetime="2021-06-28T16:00:00.000Z" itemprop="datePublished">2021-06-29</time>
 	</a>
 </span>
-    
+        
   <span class="article-category">
     <i class="icon icon-folder"></i>
     <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a>►<a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
   </span>
 
-    
+        
   <span class="article-tag">
     <i class="icon icon-tags"></i>
-	<a class="article-tag-link-link" href="/tags/ELK/" rel="tag">ELK</a>, <a class="article-tag-link-link" href="/tags/Elasticsearch/" rel="tag">Elasticsearch</a>, <a class="article-tag-link-link" href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag">技术</a>
+	<a class="article-tag-link-link" href="/tags/ELK/" rel="tag">ELK</a>, <a class="article-tag-link-link" href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag">技术</a>
   </span>
 
 
-    <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/04/27/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E5%AE%89%E5%85%A8%E7%89%B9%E6%80%A7%EF%BC%88Security%EF%BC%89/#comments" class="article-comment-link">评论</a></span>
-    
+        
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2021/06/29/%E6%8A%80%E6%9C%AF/ELK/ELK-%E5%AE%9E%E8%B7%B520210629/" class="leancloud_visitors"  data-flag-title="ELK-实践20210629">
+			<span class="leancloud-visitors-count">0</span>
+		</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/06/29/%E6%8A%80%E6%9C%AF/ELK/ELK-%E5%AE%9E%E8%B7%B520210629/#comments" class="article-comment-link">评论</a></span>
+        
 	
-		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 2k(字)</span>
-	
-	
-		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 8(分)</span>
-	
-
-  </p>
-</article>
-
-    
-      <article class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
-  <div class="article-header">
-    
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/04/25/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E8%81%9A%E5%90%88%EF%BC%88Aggregations%EF%BC%89/">Elasticsearch-聚合（Aggregations）</a>
-    </h1>
-  
-
-  </div>
-  
-  <div class="article-entry text-muted" itemprop="description">
-    <blockquote>
-<p>Elasticsearch聚合速查表，介绍指标聚合、桶分聚合、管道聚合的分类和聚合示例。<br> 基于7.11版本。</p>
-</blockquote>
-  </div>
-  
-  <p class="article-meta">
-    <span class="article-date">
-    <i class="icon icon-calendar-check"></i>
-	<a href="/2021/04/25/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E8%81%9A%E5%90%88%EF%BC%88Aggregations%EF%BC%89/" class="article-date">
-	  <time datetime="2021-04-24T16:00:00.000Z" itemprop="datePublished">4月 25</time>
-	</a>
-</span>
-    
-  <span class="article-category">
-    <i class="icon icon-folder"></i>
-    <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a>►<a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
-  </span>
-
-    
-  <span class="article-tag">
-    <i class="icon icon-tags"></i>
-	<a class="article-tag-link-link" href="/tags/ELK/" rel="tag">ELK</a>, <a class="article-tag-link-link" href="/tags/Elasticsearch/" rel="tag">Elasticsearch</a>, <a class="article-tag-link-link" href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag">技术</a>
-  </span>
-
-
-    <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/04/25/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E8%81%9A%E5%90%88%EF%BC%88Aggregations%EF%BC%89/#comments" class="article-comment-link">评论</a></span>
-    
-	
-		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 1.9k(字)</span>
-	
-	
-		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 8(分)</span>
-	
-
-  </p>
-</article>
-
-    
-      <article class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
-  <div class="article-header">
-    
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/04/16/%E8%AF%AD%E5%BD%95/%E8%AF%AD%E5%BD%95-3/">语录-3</a>
-    </h1>
-  
-
-  </div>
-  
-  <div class="article-entry text-muted" itemprop="description">
-    <ol>
-<li>五只猴子的故事</li>
-<li>任正非在一次座谈会上谈加强项目财务的有效管理</li>
-<li>眼镜蛇效应</li>
-<li>能源效率的诅咒</li>
-</ol>
-  </div>
-  
-  <p class="article-meta">
-    <span class="article-date">
-    <i class="icon icon-calendar-check"></i>
-	<a href="/2021/04/16/%E8%AF%AD%E5%BD%95/%E8%AF%AD%E5%BD%95-3/" class="article-date">
-	  <time datetime="2021-04-15T16:00:00.000Z" itemprop="datePublished">4月 16</time>
-	</a>
-</span>
-    
-  <span class="article-category">
-    <i class="icon icon-folder"></i>
-    <a class="article-category-link" href="/categories/%E8%AF%AD%E5%BD%95/">语录</a>
-  </span>
-
-    
-  <span class="article-tag">
-    <i class="icon icon-tags"></i>
-	<a class="article-tag-link-link" href="/tags/%E8%AF%AD%E5%BD%95/" rel="tag">语录</a>
-  </span>
-
-
-    <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/04/16/%E8%AF%AD%E5%BD%95/%E8%AF%AD%E5%BD%95-3/#comments" class="article-comment-link">评论</a></span>
-    
-	
-		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 920(字)</span>
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 742(字)</span>
 	
 	
 		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 3(分)</span>
 	
 
-  </p>
-</article>
-
-    
-      <article class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
-  <div class="article-header">
-    
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/04/08/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E6%90%9C%E7%B4%A2%EF%BC%88Search-DSL%EF%BC%89/">Elasticsearch-搜索（Search-DSL）</a>
-    </h1>
-  
-
-  </div>
-  
-  <div class="article-entry text-muted" itemprop="description">
-    <blockquote>
-<p>Elasticsearch介绍查询搜索请求包含哪些选项，并介绍其中的Query DSL。包括语法说明、查询和过滤上下文、复合查询等和查询示例。<br>基于7.11版本。</p>
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <blockquote>
+<p>复合聚合按计数排序，TSVB使用脚本字段，滚动升级，Elastic中国社区官方博客</p>
 </blockquote>
-  </div>
-  
-  <p class="article-meta">
-    <span class="article-date">
-    <i class="icon icon-calendar-check"></i>
-	<a href="/2021/04/08/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E6%90%9C%E7%B4%A2%EF%BC%88Search-DSL%EF%BC%89/" class="article-date">
-	  <time datetime="2021-04-07T16:00:00.000Z" itemprop="datePublished">4月 8</time>
-	</a>
-</span>
-    
-  <span class="article-category">
-    <i class="icon icon-folder"></i>
-    <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a>►<a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
-  </span>
+<span id="more"></span>
 
-    
-  <span class="article-tag">
-    <i class="icon icon-tags"></i>
-	<a class="article-tag-link-link" href="/tags/ELK/" rel="tag">ELK</a>, <a class="article-tag-link-link" href="/tags/Elasticsearch/" rel="tag">Elasticsearch</a>, <a class="article-tag-link-link" href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag">技术</a>
-  </span>
+<h2 id="1-复合聚合按计数排序"><a href="#1-复合聚合按计数排序" class="headerlink" title="1. 复合聚合按计数排序"></a>1. 复合聚合按计数排序</h2><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">GET /service-exception/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;size&quot;</span>: <span class="number">0</span>,</span><br><span class="line">  <span class="attr">&quot;query&quot;</span>: &#123;</span><br><span class="line">    <span class="attr">&quot;range&quot;</span>: &#123;</span><br><span class="line">      <span class="attr">&quot;@timestamp&quot;</span>: &#123;</span><br><span class="line">        <span class="attr">&quot;gte&quot;</span>: <span class="string">&quot;2021-05-06 00:00:00&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;lte&quot;</span>: <span class="string">&quot;2021-05-06 23:59:59&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;format&quot;</span>: <span class="string">&quot;yyyy-MM-dd HH:mm:ss&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;time_zone&quot;</span>:<span class="string">&quot;+08:00&quot;</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">&quot;aggs&quot;</span>: &#123;</span><br><span class="line">    <span class="attr">&quot;group_by_fields&quot;</span>: &#123;</span><br><span class="line">      <span class="attr">&quot;composite&quot;</span>:&#123;</span><br><span class="line">        <span class="attr">&quot;sources&quot;</span>: [</span><br><span class="line">          &#123;</span><br><span class="line">            <span class="attr">&quot;service_name&quot;</span>: &#123;</span><br><span class="line">              <span class="attr">&quot;terms&quot;</span>: &#123;</span><br><span class="line">                <span class="attr">&quot;field&quot;</span>: <span class="string">&quot;service_name&quot;</span></span><br><span class="line">              &#125;</span><br><span class="line">            &#125;</span><br><span class="line">          &#125;,&#123;</span><br><span class="line">            <span class="attr">&quot;error_message&quot;</span>: &#123;</span><br><span class="line">              <span class="attr">&quot;terms&quot;</span>: &#123;</span><br><span class="line">                <span class="attr">&quot;field&quot;</span>: <span class="string">&quot;error_message&quot;</span></span><br><span class="line">              &#125;</span><br><span class="line">            &#125;</span><br><span class="line">          &#125;</span><br><span class="line">        ],</span><br><span class="line">        <span class="attr">&quot;size&quot;</span>: <span class="number">50</span></span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="attr">&quot;aggs&quot;</span>: &#123;</span><br><span class="line">        <span class="attr">&quot;top_bucket_sort&quot;</span>:&#123;</span><br><span class="line">          <span class="attr">&quot;bucket_sort&quot;</span>: &#123;</span><br><span class="line">            <span class="attr">&quot;sort&quot;</span>: [</span><br><span class="line">              &#123; <span class="attr">&quot;_count&quot;</span>: &#123; <span class="attr">&quot;order&quot;</span>: <span class="string">&quot;desc&quot;</span> &#125; &#125;</span><br><span class="line">              ]</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-
-    <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/04/08/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E6%90%9C%E7%B4%A2%EF%BC%88Search-DSL%EF%BC%89/#comments" class="article-comment-link">评论</a></span>
-    
-	
-		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 2.1k(字)</span>
-	
-	
-		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 8(分)</span>
-	
-
-  </p>
-</article>
-
-    
-      <article class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
-  <div class="article-header">
-    
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/04/07/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E7%B4%A2%E5%BC%95%EF%BC%88Index%EF%BC%89/">Elasticsearch-索引（Index）</a>
-    </h1>
-  
-
-  </div>
-  
-  <div class="article-entry text-muted" itemprop="description">
-    <blockquote>
-<p>Elasticsearch索引介绍，包括索引设置、索引模板、索引生命周期管理、翻滚索引、索引别名、滚动索引。<br> 基于7.11版本。</p>
-</blockquote>
-  </div>
-  
-  <p class="article-meta">
-    <span class="article-date">
-    <i class="icon icon-calendar-check"></i>
-	<a href="/2021/04/07/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E7%B4%A2%E5%BC%95%EF%BC%88Index%EF%BC%89/" class="article-date">
-	  <time datetime="2021-04-06T16:00:00.000Z" itemprop="datePublished">4月 7</time>
-	</a>
-</span>
-    
-  <span class="article-category">
-    <i class="icon icon-folder"></i>
-    <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a>►<a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
-  </span>
-
-    
-  <span class="article-tag">
-    <i class="icon icon-tags"></i>
-	<a class="article-tag-link-link" href="/tags/ELK/" rel="tag">ELK</a>, <a class="article-tag-link-link" href="/tags/Elasticsearch/" rel="tag">Elasticsearch</a>, <a class="article-tag-link-link" href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag">技术</a>
-  </span>
-
-
-    <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/04/07/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E7%B4%A2%E5%BC%95%EF%BC%88Index%EF%BC%89/#comments" class="article-comment-link">评论</a></span>
-    
-	
-		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 3.7k(字)</span>
-	
-	
-		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 14(分)</span>
-	
-
-  </p>
-</article>
-
-    
-      <article class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
-  <div class="article-header">
-    
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/04/01/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E4%BB%8B%E7%BB%8D/">Elasticsearch-介绍</a>
-    </h1>
-  
-
-  </div>
-  
-  <div class="article-entry text-muted" itemprop="description">
-    <blockquote>
-<p>Elasticsearch介绍，包括文档与索引、倒排索引、搜索和分析、可伸缩和弹性（节点、分片、跨集群复制）、常用场景。<br> 内容大部分源自官方文档第一节“What is Elasticsearch?”<br> 基于7.11版本。</p>
-</blockquote>
-  </div>
-  
-  <p class="article-meta">
-    <span class="article-date">
-    <i class="icon icon-calendar-check"></i>
-	<a href="/2021/04/01/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E4%BB%8B%E7%BB%8D/" class="article-date">
-	  <time datetime="2021-03-31T16:00:00.000Z" itemprop="datePublished">4月 1</time>
-	</a>
-</span>
-    
-  <span class="article-category">
-    <i class="icon icon-folder"></i>
-    <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a>►<a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
-  </span>
-
-    
-  <span class="article-tag">
-    <i class="icon icon-tags"></i>
-	<a class="article-tag-link-link" href="/tags/ELK/" rel="tag">ELK</a>, <a class="article-tag-link-link" href="/tags/Elasticsearch/" rel="tag">Elasticsearch</a>, <a class="article-tag-link-link" href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag">技术</a>
-  </span>
-
-
-    <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/04/01/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E4%BB%8B%E7%BB%8D/#comments" class="article-comment-link">评论</a></span>
-    
-	
-		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 2.1k(字)</span>
-	
-	
-		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 7(分)</span>
-	
-
-  </p>
-</article>
-
-    
-      <article class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
-  <div class="article-header">
-    
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/04/01/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E6%96%87%E6%9C%AC%E5%88%86%E6%9E%90%EF%BC%88Text%20Analysis%EF%BC%89/">Elasticsearch-文本分析（Text Analysis）</a>
-    </h1>
-  
-
-  </div>
-  
-  <p class="article-meta">
-    <span class="article-date">
-    <i class="icon icon-calendar-check"></i>
-	<a href="/2021/04/01/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E6%96%87%E6%9C%AC%E5%88%86%E6%9E%90%EF%BC%88Text%20Analysis%EF%BC%89/" class="article-date">
-	  <time datetime="2021-03-31T16:00:00.000Z" itemprop="datePublished">4月 1</time>
-	</a>
-</span>
-    
-  <span class="article-category">
-    <i class="icon icon-folder"></i>
-    <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a>►<a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
-  </span>
-
-    
-  <span class="article-tag">
-    <i class="icon icon-tags"></i>
-	<a class="article-tag-link-link" href="/tags/ELK/" rel="tag">ELK</a>, <a class="article-tag-link-link" href="/tags/Elasticsearch/" rel="tag">Elasticsearch</a>, <a class="article-tag-link-link" href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag">技术</a>
-  </span>
-
-
-    <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/04/01/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E6%96%87%E6%9C%AC%E5%88%86%E6%9E%90%EF%BC%88Text%20Analysis%EF%BC%89/#comments" class="article-comment-link">评论</a></span>
-    
-	
-		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 498(字)</span>
-	
-	
-		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 1(分)</span>
-	
-
-  </p>
-</article>
-
-    
-      <article class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
-  <div class="article-header">
-    
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/04/01/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E6%98%A0%E5%B0%84%EF%BC%88Mapping%EF%BC%89/">Elasticsearch-映射（Mapping）</a>
-    </h1>
-  
-
-  </div>
-  
-  <div class="article-entry text-muted" itemprop="description">
-    <blockquote>
-<p>Elasticsearch映射介绍，包括动态映射、显式映射、字段数据类型、映射参数、映射限制设置。<br> 内容大纲源自官方文档“Mapping”模块<br> 基于7.11版本。</p>
-</blockquote>
-  </div>
-  
-  <p class="article-meta">
-    <span class="article-date">
-    <i class="icon icon-calendar-check"></i>
-	<a href="/2021/04/01/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E6%98%A0%E5%B0%84%EF%BC%88Mapping%EF%BC%89/" class="article-date">
-	  <time datetime="2021-03-31T16:00:00.000Z" itemprop="datePublished">4月 1</time>
-	</a>
-</span>
-    
-  <span class="article-category">
-    <i class="icon icon-folder"></i>
-    <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a>►<a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
-  </span>
-
-    
-  <span class="article-tag">
-    <i class="icon icon-tags"></i>
-	<a class="article-tag-link-link" href="/tags/ELK/" rel="tag">ELK</a>, <a class="article-tag-link-link" href="/tags/Elasticsearch/" rel="tag">Elasticsearch</a>, <a class="article-tag-link-link" href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag">技术</a>
-  </span>
-
-
-    <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/04/01/%E6%8A%80%E6%9C%AF/ELK/Elasticsearch-%E6%98%A0%E5%B0%84%EF%BC%88Mapping%EF%BC%89/#comments" class="article-comment-link">评论</a></span>
-    
-	
-		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 2.2k(字)</span>
-	
-	
-		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 8(分)</span>
-	
-
-  </p>
-</article>
-
-    
-      <article class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
-  <div class="article-header">
-    
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/03/25/%E8%AF%AD%E5%BD%95/%E8%AF%AD%E5%BD%95-2/">语录-2</a>
-    </h1>
-  
-
-  </div>
-  
-  <div class="article-entry text-muted" itemprop="description">
-    <ol>
-<li>如果你像这样全速开上五分钟，就抵得上某些人碌碌无为的活一辈子</li>
-<li>少许的牺牲是必须的</li>
-<li>上吊的研究</li>
+<h2 id="2-TSVB使用脚本字段（-TSVB-Visualize-Scripted-Fields）"><a href="#2-TSVB使用脚本字段（-TSVB-Visualize-Scripted-Fields）" class="headerlink" title="2. TSVB使用脚本字段（[TSVB] Visualize Scripted Fields）"></a>2. TSVB使用脚本字段（[TSVB] Visualize Scripted Fields）</h2><p><a target="_blank" rel="noopener" href="https://github.com/elastic/kibana/issues/13928">https://github.com/elastic/kibana/issues/13928</a><br><a target="_blank" rel="noopener" href="https://github.com/elastic/kibana/issues/11999">https://github.com/elastic/kibana/issues/11999</a><br><a target="_blank" rel="noopener" href="https://github.com/elastic/kibana/issues/82438">https://github.com/elastic/kibana/issues/82438</a></p>
+<h2 id="3-滚动升级（Rolling-Upgrade-Elasticsearch）"><a href="#3-滚动升级（Rolling-Upgrade-Elasticsearch）" class="headerlink" title="3. 滚动升级（Rolling Upgrade Elasticsearch）"></a>3. 滚动升级（Rolling Upgrade Elasticsearch）</h2><p><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-upgrade.html">https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-upgrade.html</a></p>
+<p>注意事项：</p>
+<ol>
+<li>不支持在升级期间以外在同一集群中运行多个版本的Elasticsearch，因为不能将分片从升级的节点复制到运行旧版本的节点。</li>
+<li>升级时将集群的节点划分为两组并按顺序升级组（第一组：Nodes that are not Master-eligible，第二组：Master-eligible nodes），可以确保所有Master-ineligible节点都能够加入集群，无论符合Master-eligible节点是否已经升级。</li>
+<li>一旦您开始将集群升级到指定版本，您就必须完成升级，它可能对其内部状态进行无法恢复的更改</li>
 </ol>
-  </div>
-  
-  <p class="article-meta">
-    <span class="article-date">
-    <i class="icon icon-calendar-check"></i>
-	<a href="/2021/03/25/%E8%AF%AD%E5%BD%95/%E8%AF%AD%E5%BD%95-2/" class="article-date">
-	  <time datetime="2021-03-24T16:00:00.000Z" itemprop="datePublished">3月 25</time>
-	</a>
-</span>
+<p>升级步骤：</p>
+<ul>
+<li>禁用分片分配</li>
+<li>停止非必要的索引和执行同步刷新(可选)</li>
+<li>暂时停止与活动机器学习作业和数据源相关的任务(可选)</li>
+<li>关闭单个节点</li>
+<li>升级关闭的节点(如果没有使用外部数据目录，请将旧数据目录复制到新安装)</li>
+<li>升级任何插件</li>
+<li>启动升级后的节点</li>
+<li>重新启用分片分配</li>
+<li>等待节点恢复</li>
+<li>对于需要更新的每个节点重复这些步骤</li>
+<li>重新启动机器学习作业</li>
+</ul>
+<p>检查</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"># 升级时将集群的节点划分为两组并按顺序升级组</span><br><span class="line">GET /_nodes/_all,master:<span class="literal">false</span></span><br><span class="line">GET /_nodes/master:<span class="literal">true</span></span><br><span class="line"></span><br><span class="line"># 禁用分片分配</span><br><span class="line">PUT _cluster/settings</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;persistent&quot;</span>: &#123;</span><br><span class="line">    <span class="attr">&quot;cluster.routing.allocation.enable&quot;</span>: <span class="string">&quot;primaries&quot;</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 停止非必要的索引和执行同步刷新</span><br><span class="line">POST _flush/synced</span><br><span class="line"></span><br><span class="line"># 重新启用分片分配</span><br><span class="line">PUT _cluster/settings</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;persistent&quot;</span>: &#123;</span><br><span class="line">    <span class="attr">&quot;cluster.routing.allocation.enable&quot;</span>: <span class="literal">null</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 等待节点恢复</span><br><span class="line">GET _cat/health?v=<span class="literal">true</span></span><br><span class="line"></span><br><span class="line"># 对于需要更新的每个节点重复这些步骤</span><br><span class="line">GET /_cat/health?v=<span class="literal">true</span></span><br><span class="line">GET /_cat/nodes?h=ip,name,version&amp;v=<span class="literal">true</span></span><br><span class="line"></span><br><span class="line"># 重新启动机器学习作业</span><br><span class="line">POST _ml/set_upgrade_mode?enabled=<span class="literal">false</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="4-Elastic中国社区官方博客"><a href="#4-Elastic中国社区官方博客" class="headerlink" title="4. Elastic中国社区官方博客"></a>4. Elastic中国社区官方博客</h2><p><a target="_blank" rel="noopener" href="https://elasticstack.blog.csdn.net/article/details/118152293">Kibana：如何让用户匿名访问 Kibana 中的 Dashboard</a><br><a target="_blank" rel="noopener" href="https://elasticstack.blog.csdn.net/article/details/117187064">Elasticsearch：运用 Python 来实现对搜索结果的分页</a></p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
     
-  <span class="article-category">
-    <i class="icon icon-folder"></i>
-    <a class="article-category-link" href="/categories/%E8%AF%AD%E5%BD%95/">语录</a>
-  </span>
-
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.lights8080.com/2021/06/29/%E6%8A%80%E6%9C%AF/ELK/ELK-%E5%AE%9E%E8%B7%B520210629/" title="ELK-实践20210629" target="_blank" rel="external">http://www.lights8080.com/2021/06/29/%E6%8A%80%E6%9C%AF/ELK/ELK-%E5%AE%9E%E8%B7%B520210629/</a>
+    </li>
     
-  <span class="article-tag">
-    <i class="icon icon-tags"></i>
-	<a class="article-tag-link-link" href="/tags/%E8%AF%AD%E5%BD%95/" rel="tag">语录</a>
-  </span>
-
-
-    <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/25/%E8%AF%AD%E5%BD%95/%E8%AF%AD%E5%BD%95-2/#comments" class="article-comment-link">评论</a></span>
-    
-	
-		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 843(字)</span>
-	
-	
-		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 2(分)</span>
-	
-
-  </p>
-</article>
-
-    
-      <article class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
-  <div class="article-header">
-    
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/03/22/%E6%8A%80%E6%9C%AF/ELK/Logstash-%E9%85%8D%E7%BD%AE/">Logstash-配置</a>
-    </h1>
-  
-
-  </div>
-  
-  <div class="article-entry text-muted" itemprop="description">
-    <blockquote>
-<p>Logstash配置介绍、插件说明、配置说明、高级配置、命令说明<br>基于7.11版本。<br><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/7.11/index.html">https://www.elastic.co/guide/en/logstash/7.11/index.html</a></p>
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
 </blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="http://www.lights8080.com" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="http://www.lights8080.com" target="_blank"><span class="text-dark">七路灯</span><small class="ml-1x">从事互联网开发，信奉终身成长的技术人</small></a></h3>
+        <div>人的一生应当有许多停靠站，我但愿每一个站台都有一盏雾中的灯。</div>
+      </div>
+    </figure>
   </div>
-  
-  <p class="article-meta">
-    <span class="article-date">
-    <i class="icon icon-calendar-check"></i>
-	<a href="/2021/03/22/%E6%8A%80%E6%9C%AF/ELK/Logstash-%E9%85%8D%E7%BD%AE/" class="article-date">
-	  <time datetime="2021-03-21T16:00:00.000Z" itemprop="datePublished">3月 22</time>
-	</a>
-</span>
-    
-  <span class="article-category">
-    <i class="icon icon-folder"></i>
-    <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a>►<a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a>
-  </span>
-
-    
-  <span class="article-tag">
-    <i class="icon icon-tags"></i>
-	<a class="article-tag-link-link" href="/tags/ELK/" rel="tag">ELK</a>, <a class="article-tag-link-link" href="/tags/Logstash/" rel="tag">Logstash</a>, <a class="article-tag-link-link" href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag">技术</a>
-  </span>
+</div>
 
 
-    <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/22/%E6%8A%80%E6%9C%AF/ELK/Logstash-%E9%85%8D%E7%BD%AE/#comments" class="article-comment-link">评论</a></span>
-    
-	
-		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 3.2k(字)</span>
-	
-	
-		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 12(分)</span>
-	
-
-  </p>
-</article>
-
-    
-  </div>
-
+    </div>
+  </article>
   
     
-    <nav class="bar bar-footer clearfix" data-stick-bottom>
-        <div class="bar-inner">
-        <ul class="pager pull-left">
-            
-            <li class="prev">
-                <a href="/page/3/">
-                    <i class="icon icon-angle-left"></i>
-                    上一页
-                </a>
-            </li>
-            
-            
-            <li class="next">
-                <a href="/page/5/">
-                    下一页
-                    <i class="icon icon-angle-right"></i>
-                </a>
-            </li>
-            
-        </ul>
-        <div class="total-article bar-right">Page 4 of 5</div>
-        </div>
-    </nav>
+  <section id="comments">
+  	
+      <div id="vcomments"></div>
     
- 
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/2021/06/24/%E6%8A%80%E6%9C%AF/JAVA/JAVA%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B%E6%80%9D%E6%83%B3/" title="JAVA面向对象编程思想"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo, wechat" data-mobile-sites="weibo, wechat"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
 </main>
 
   <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
@@ -904,6 +540,33 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
    
 
 
+
+
+   
+    
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/valine"></script>
+  <script type="text/javascript">
+  var GUEST = ['nick', 'mail', 'link'];
+  var meta = 'nick,mail,link';
+  meta = meta.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#vcomments',
+    verify: false,
+    notify: false,
+    appId: '0A4Cg4vm7SmX0sfL9lfvExSq-gzGzoHsz',
+    appKey: 'jkuwap2Fh3CKBlP1SO59uyb4',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: meta,
+    pageSize: '10' || 10,
+    visitor: true
+  });
+  </script>
+
+     
 
 
 
