@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Apache common-pool | 七路灯</title>
+  <meta name="description" content="对象池介绍">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Apache common-pool">
+<meta property="og:url" content="http://www.lights8080.com/2021/07/09/%E6%8A%80%E6%9C%AF/JAVA/Apache%20common-pool/index.html">
+<meta property="og:site_name" content="七路灯">
+<meta property="og:description" content="对象池介绍">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lights8080/lights8080-oss/raw/master/2021/07/yVX1dI.jpg">
+<meta property="article:published_time" content="2021-07-08T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-07-09T05:56:13.000Z">
+<meta property="article:author" content="七路灯">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lights8080/lights8080-oss/raw/master/2021/07/yVX1dI.jpg">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://www.lights8080.com/2021/07/09/%E6%8A%80%E6%9C%AF/JAVA/Apache%20common-pool/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="七路灯" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="../images/favicon.ico" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="http://www.lights8080.com" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">七路灯</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">从事互联网开发，信奉终身成长的技术人</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Beijing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lights8080" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="https://www.zhihu.com/people/lights8080" target="_blank" title="Zhihu" data-toggle=tooltip data-placement=top><i class="icon icon-zhihu"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎关注公众号共同交流学习!</p>
+            </div>
+            <div class="content">
+                <img src="/../images/gongzhonghao-qrcode.jpg" alt="site.qrcode_alt" title="site.qrcode_title" />
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/">人体系统</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%B7%A5%E5%85%B7/">工具</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><span class="category-list-count">39</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/ELK/">ELK</a><span class="category-list-count">23</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/JAVA/">JAVA</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/JVM/">JVM</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/Java/">Java</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/Linux/">Linux</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/SpringCloud/">SpringCloud</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/%E5%89%8D%E7%AB%AF/">前端</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/%E8%84%9A%E6%9C%AC/">脚本</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%88%E7%8E%87/">效率</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%9D%82%E8%B0%88/">杂谈</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/">计算机</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%AF%AD%E5%BD%95/">语录</a><span class="category-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/ELK/" rel="tag">ELK</a><span class="tag-list-count">23</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Elasticsearch/" rel="tag">Elasticsearch</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Filebeat/" rel="tag">Filebeat</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Git/" rel="tag">Git</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/" rel="tag">Hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IDEA/" rel="tag">IDEA</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JAVA/" rel="tag">JAVA</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/" rel="tag">JVM</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/" rel="tag">Java</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Kibana/" rel="tag">Kibana</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Logstash/" rel="tag">Logstash</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Maven/" rel="tag">Maven</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Mysql/" rel="tag">Mysql</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/" rel="tag">Nginx</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NodeJs/" rel="tag">NodeJs</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Python/" rel="tag">Python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SSH/" rel="tag">SSH</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Shell/" rel="tag">Shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SpringCloud/" rel="tag">SpringCloud</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/" rel="tag">个人博客</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/" rel="tag">人体系统</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag">技术</a><span class="tag-list-count">30</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%88%E7%8E%87/" rel="tag">效率</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%9D%82%E8%B0%88/" rel="tag">杂谈</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%9D%8E%E6%B0%B8%E4%B9%90%E8%80%81%E5%B8%88/" rel="tag">李永乐老师</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BA%BF%E4%B8%8A%E9%97%AE%E9%A2%98%E5%A4%84%E7%90%86/" rel="tag">线上问题处理</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BC%96%E7%A8%8B%E6%80%9D%E6%83%B3/" rel="tag">编程思想</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BE%8E%E5%9B%BD%E4%B8%AA%E4%BA%BA%E6%94%AF%E7%A5%A8/" rel="tag">美国个人支票</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%84%9A%E6%9C%AC/" rel="tag">脚本</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA/" rel="tag">计算机</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AF%AD%E5%BD%95/" rel="tag">语录</a><span class="tag-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/ELK/" style="font-size: 13.83px;">ELK</a> <a href="/tags/Elasticsearch/" style="font-size: 13.67px;">Elasticsearch</a> <a href="/tags/Filebeat/" style="font-size: 13.17px;">Filebeat</a> <a href="/tags/Git/" style="font-size: 13px;">Git</a> <a href="/tags/Hexo/" style="font-size: 13px;">Hexo</a> <a href="/tags/IDEA/" style="font-size: 13px;">IDEA</a> <a href="/tags/JAVA/" style="font-size: 13px;">JAVA</a> <a href="/tags/JVM/" style="font-size: 13.17px;">JVM</a> <a href="/tags/Java/" style="font-size: 13px;">Java</a> <a href="/tags/Kibana/" style="font-size: 13px;">Kibana</a> <a href="/tags/Linux/" style="font-size: 13.5px;">Linux</a> <a href="/tags/Logstash/" style="font-size: 13.17px;">Logstash</a> <a href="/tags/Maven/" style="font-size: 13px;">Maven</a> <a href="/tags/Mysql/" style="font-size: 13px;">Mysql</a> <a href="/tags/Nginx/" style="font-size: 13px;">Nginx</a> <a href="/tags/NodeJs/" style="font-size: 13px;">NodeJs</a> <a href="/tags/Python/" style="font-size: 13px;">Python</a> <a href="/tags/SSH/" style="font-size: 13px;">SSH</a> <a href="/tags/Shell/" style="font-size: 13px;">Shell</a> <a href="/tags/SpringCloud/" style="font-size: 13px;">SpringCloud</a> <a href="/tags/%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/" style="font-size: 13px;">个人博客</a> <a href="/tags/%E4%BA%BA%E4%BD%93%E7%B3%BB%E7%BB%9F/" style="font-size: 13px;">人体系统</a> <a href="/tags/%E6%8A%80%E6%9C%AF/" style="font-size: 14px;">技术</a> <a href="/tags/%E6%95%88%E7%8E%87/" style="font-size: 13px;">效率</a> <a href="/tags/%E6%9D%82%E8%B0%88/" style="font-size: 13.17px;">杂谈</a> <a href="/tags/%E6%9D%8E%E6%B0%B8%E4%B9%90%E8%80%81%E5%B8%88/" style="font-size: 13px;">李永乐老师</a> <a href="/tags/%E7%BA%BF%E4%B8%8A%E9%97%AE%E9%A2%98%E5%A4%84%E7%90%86/" style="font-size: 13.33px;">线上问题处理</a> <a href="/tags/%E7%BC%96%E7%A8%8B%E6%80%9D%E6%83%B3/" style="font-size: 13px;">编程思想</a> <a href="/tags/%E7%BE%8E%E5%9B%BD%E4%B8%AA%E4%BA%BA%E6%94%AF%E7%A5%A8/" style="font-size: 13px;">美国个人支票</a> <a href="/tags/%E8%84%9A%E6%9C%AC/" style="font-size: 13px;">脚本</a> <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA/" style="font-size: 13.17px;">计算机</a> <a href="/tags/%E8%AF%AD%E5%BD%95/" style="font-size: 13.33px;">语录</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">19</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">13</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">三月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Java/">Java</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/07/09/%E6%8A%80%E6%9C%AF/JAVA/Apache%20common-pool/" class="title">Apache common-pool</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-07-08T16:00:00.000Z" itemprop="datePublished">2021-07-09</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%95%88%E7%8E%87/">效率</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/07/09/%E6%8A%80%E6%9C%AF/%E5%85%B6%E4%BB%96/IDEA%E5%BF%AB%E6%8D%B7%E9%94%AE(mac)/" class="title">IDEA快捷键(Mac)</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-07-08T16:00:00.000Z" itemprop="datePublished">2021-07-09</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/07/09/%E6%8A%80%E6%9C%AF/%E5%85%B6%E4%BB%96/SSH%E5%85%8D%E5%AF%86%E7%99%BB%E5%BD%95/" class="title">SSH免密登录</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-07-08T16:00:00.000Z" itemprop="datePublished">2021-07-09</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/07/08/%E6%8A%80%E6%9C%AF/%E5%85%B6%E4%BB%96/Git/" class="title">Git</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-07-07T16:00:00.000Z" itemprop="datePublished">2021-07-08</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="icon icon-angle-right"></i><a class="category-link" href="/categories/%E6%8A%80%E6%9C%AF/Linux/">Linux</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/07/07/%E6%8A%80%E6%9C%AF/Linux/Linux%202%3E&1/" class="title">Linux 2&gt;&amp;1</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-07-06T16:00:00.000Z" itemprop="datePublished">2021-07-07</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-技术/JAVA/Apache common-pool" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Apache common-pool
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/07/09/%E6%8A%80%E6%9C%AF/JAVA/Apache%20common-pool/" class="article-date">
+	  <time datetime="2021-07-08T16:00:00.000Z" itemprop="datePublished">2021-07-09</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Java/">Java</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/Java/" rel="tag">Java</a>
+  </span>
+
+
+        
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2021/07/09/%E6%8A%80%E6%9C%AF/JAVA/Apache%20common-pool/" class="leancloud_visitors"  data-flag-title="Apache common-pool">
+			<span class="leancloud-visitors-count">0</span>
+		</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/07/09/%E6%8A%80%E6%9C%AF/JAVA/Apache%20common-pool/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 1.5k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 5(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>对象池介绍</p>
+<span id="more"></span>
+
+<h2 id="对象生命周期"><a href="#对象生命周期" class="headerlink" title="对象生命周期"></a>对象生命周期</h2><p><img src="https://gitee.com/lights8080/lights8080-oss/raw/master/2021/07/yVX1dI.jpg"></p>
+<h2 id="Config详解"><a href="#Config详解" class="headerlink" title="Config详解"></a>Config详解</h2><ol>
+<li>maxActive: 链接池中最大连接数,默认为8.</li>
+<li>maxIdle: 链接池中最大空闲的连接数,默认为8.</li>
+<li>minIdle: 连接池中最少空闲的连接数,默认为0.</li>
+<li>maxWait: 当连接池资源耗尽时，调用者最大阻塞的时间，超时将跑出异常。单位，毫秒数;默认为-1.表示永不超时.</li>
+<li>minEvictableIdleTimeMillis: 连接空闲的最小时间，达到此值后空闲连接将可能会被移除。负值(-1)表示不移除。</li>
+<li>softMinEvictableIdleTimeMillis: 连接空闲的最小时间，达到此值后空闲链接将会被移除，且保留“minIdle”个空闲连接数。默认为-1.</li>
+<li>numTestsPerEvictionRun: 对于“空闲链接”检测线程而言，每次检测的链接资源的个数。默认为3.</li>
+<li>testOnBorrow: 向调用者输出“链接”资源时，是否检测是有有效，如果无效则从连接池中移除，并尝试获取继续获取。默认为false。建议保持默认值.</li>
+<li>testOnReturn:  向连接池“归还”链接时，是否检测“链接”对象的有效性。默认为false。建议保持默认值.</li>
+<li>testWhileIdle:  向调用者输出“链接”对象时，是否检测它的空闲超时；默认为false。如果“链接”空闲超时，将会被移除。建议保持默认值.</li>
+<li>timeBetweenEvictionRunsMillis:  “空闲链接”检测线程，检测的周期，毫秒数。如果为负值，表示不运行“检测线程”。默认为-1.</li>
+<li>whenExhaustedAction: 当“连接池”中active数量达到阀值时，即“链接”资源耗尽时，连接池需要采取的手段, 默认为1：<ul>
+<li>0 : 抛出异常，</li>
+<li>1 : 阻塞，直到有可用链接资源</li>
+<li>2 : 强制创建新的链接资源</li>
+</ul>
+</li>
+</ol>
+<h2 id="代码说明"><a href="#代码说明" class="headerlink" title="代码说明"></a>代码说明</h2><pre><code>
+1. 整个方案从ObjectPool，PooledObjectFactory和PooledObject三个接口展开，
+2. 其中ObjectPool定义了对象池要实现的功能【比如怎么存取，怎么过期】；
+3. PooledObjectFactory定义了被池化的对象的创建，初始化，激活，钝化以及销毁功能；
+4. PooledObject定了一被池化对象的一些附加信息【创建时间，池中状态】；
+5. 大概流程就是由PooledObjectFactory创建的对象经过PooledObject的包装然后放到ObjectPool里面来。
+</code></pre>
+
+<h3 id="ObjectPool"><a href="#ObjectPool" class="headerlink" title="ObjectPool"></a>ObjectPool</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//从池中获取对象</span></span><br><span class="line"><span class="function">T <span class="title">borrowObject</span><span class="params">()</span> <span class="keyword">throws</span> Exception, NoSuchElementException,IllegalStateException</span>;</span><br><span class="line"><span class="comment">//将对象放回池中</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">returnObject</span><span class="params">(T obj)</span> <span class="keyword">throws</span> Exception</span>;</span><br><span class="line"><span class="comment">//废弃对象</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">invalidateObject</span><span class="params">(T obj)</span> <span class="keyword">throws</span> Exception</span>;</span><br><span class="line"><span class="comment">//添加对象</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">addObject</span><span class="params">()</span> <span class="keyword">throws</span> Exception, IllegalStateException,UnsupportedOperationException</span>;</span><br><span class="line"><span class="comment">//获取对象个数</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">getNumIdle</span><span class="params">()</span></span>;</span><br><span class="line"><span class="comment">//获取活跃对象个数</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">getNumActive</span><span class="params">()</span></span>;</span><br><span class="line"><span class="comment">//清除池，池可用</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">clear</span><span class="params">()</span> <span class="keyword">throws</span> Exception, UnsupportedOperationException</span>;</span><br><span class="line"><span class="comment">//关闭池，池不可用</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">close</span><span class="params">()</span></span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="PooledObjectFactory"><a href="#PooledObjectFactory" class="headerlink" title="PooledObjectFactory"></a>PooledObjectFactory</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//创建一个新对象;当对象池中的对象个数不足时,将会使用此方法来&quot;输出&quot;一个新的&quot;对象&quot;,并交付给对象池管理</span></span><br><span class="line"><span class="function">PooledObject&lt;T&gt; <span class="title">makeObject</span><span class="params">()</span> <span class="keyword">throws</span> Exception</span>;</span><br><span class="line"><span class="comment">//销毁对象,如果对象池中检测到某个&quot;对象&quot;idle的时间超时,或者操作者向对象池&quot;归还对象&quot;时检测到&quot;对象&quot;已经无效,那么此时将会导致&quot;对象销毁&quot;;&quot;销毁对象&quot;的操作设计相差甚远,但是必须明确:当调用此方法时,&quot;对象&quot;的生命周期必须结束.如果object是线程,那么此时线程必须退出;如果object是socket操作,那么此时socket必须关闭;如果object是文件流操作,那么此时&quot;数据flush&quot;且正常关闭.</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">destroyObject</span><span class="params">(PooledObject&lt;T&gt; p)</span> <span class="keyword">throws</span> Exception</span>;</span><br><span class="line"><span class="comment">//检测对象是否&quot;有效&quot;;Pool中不能保存无效的&quot;对象&quot;,因此&quot;后台检测线程&quot;会周期性的检测Pool中&quot;对象&quot;的有效性,如果对象无效则会导致此对象从Pool中移除,并destroy;此外在调用者从Pool获取一个&quot;对象&quot;时,也会检测&quot;对象&quot;的有效性,确保不能讲&quot;无效&quot;的对象输出给调用者;当调用者使用完毕将&quot;对象归还&quot;到Pool时,仍然会检测对象的有效性.所谓有效性,就是此&quot;对象&quot;的状态是否符合预期,是否可以对调用者直接使用;如果对象是Socket,那么它的有效性就是socket的通道是否畅通/阻塞是否超时等.</span></span><br><span class="line"><span class="function"><span class="keyword">boolean</span> <span class="title">validateObject</span><span class="params">(PooledObject&lt;T&gt; p)</span></span>;</span><br><span class="line"><span class="comment">// &quot;激活&quot;对象,当Pool中决定移除一个对象交付给调用者时额外的&quot;激活&quot;操作,比如可以在activateObject方法中&quot;重置&quot;参数列表让调用者使用时感觉像一个&quot;新创建&quot;的对象一样;如果object是一个线程,可以在&quot;激活&quot;操作中重置&quot;线程中断标记&quot;,或者让线程从阻塞中唤醒等;如果object是一个socket,那么可以在&quot;激活操作&quot;中刷新通道,或者对socket进行链接重建(假如socket意外关闭)等.</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">activateObject</span><span class="params">(PooledObject&lt;T&gt; p)</span> <span class="keyword">throws</span> Exception</span>;</span><br><span class="line"><span class="comment">//&quot;钝化&quot;对象,当调用者&quot;归还对象&quot;时,Pool将会&quot;钝化对象&quot;;钝化的言外之意,就是此&quot;对象&quot;暂且需要&quot;休息&quot;一下.如果object是一个socket,那么可以passivateObject中清除buffer,将socket阻塞;如果object是一个线程,可以在&quot;钝化&quot;操作中将线程sleep或者将线程中的某个对象wait.需要注意的时,activateObject和passivateObject两个方法需要对应,避免死锁或者&quot;对象&quot;状态的混乱.</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">passivateObject</span><span class="params">(PooledObject&lt;T&gt; p)</span> <span class="keyword">throws</span> Exception</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="PooledObject"><a href="#PooledObject" class="headerlink" title="PooledObject"></a>PooledObject</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">T <span class="title">getObject</span><span class="params">()</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">long</span> <span class="title">getCreateTime</span><span class="params">()</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">long</span> <span class="title">getActiveTimeMillis</span><span class="params">()</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">long</span> <span class="title">getIdleTimeMillis</span><span class="params">()</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">long</span> <span class="title">getLastBorrowTime</span><span class="params">()</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">long</span> <span class="title">getLastReturnTime</span><span class="params">()</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">long</span> <span class="title">getLastUsedTime</span><span class="params">()</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">compareTo</span><span class="params">(PooledObject&lt;T&gt; other)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object obj)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span></span>;</span><br><span class="line"><span class="function">String <span class="title">toString</span><span class="params">()</span></span>;</span><br><span class="line"><span class="comment">//后台清理线程</span></span><br><span class="line"><span class="function"><span class="keyword">boolean</span> <span class="title">startEvictionTest</span><span class="params">()</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">boolean</span> <span class="title">endEvictionTest</span><span class="params">(Deque&lt;PooledObject&lt;T&gt;&gt; idleQueue)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">boolean</span> <span class="title">allocate</span><span class="params">()</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">boolean</span> <span class="title">deallocate</span><span class="params">()</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">invalidate</span><span class="params">()</span></span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">setLogAbandoned</span><span class="params">(<span class="keyword">boolean</span> logAbandoned)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">use</span><span class="params">()</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">printStackTrace</span><span class="params">(PrintWriter writer)</span></span>;</span><br><span class="line"><span class="function">PooledObjectState <span class="title">getState</span><span class="params">()</span></span>;</span><br><span class="line"><span class="comment">//自动补偿功能</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">markAbandoned</span><span class="params">()</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">markReturning</span><span class="params">()</span></span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="方案提供了三种类型的pool"><a href="#方案提供了三种类型的pool" class="headerlink" title="方案提供了三种类型的pool:"></a>方案提供了三种类型的pool:</h3><ol>
+<li>GenericObjectPool是一般意义上的对象池；</li>
+<li>SoftReferenceObjectPool是弱引用的对象池；</li>
+<li>GenericKeyedObjectPool是具备分组的对象池。</li>
+</ol>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="http://www.cnblogs.com/tommyli/p/3510095.html">开源项目剖析之apache-common-pool</a><br><a target="_blank" rel="noopener" href="http://www.open-open.com/lib/view/open1415453575730.html">apache-common pool的使用</a> </p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://www.lights8080.com/2021/07/09/%E6%8A%80%E6%9C%AF/JAVA/Apache%20common-pool/" title="Apache common-pool" target="_blank" rel="external">http://www.lights8080.com/2021/07/09/%E6%8A%80%E6%9C%AF/JAVA/Apache%20common-pool/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="http://www.lights8080.com" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="http://www.lights8080.com" target="_blank"><span class="text-dark">七路灯</span><small class="ml-1x">从事互联网开发，信奉终身成长的技术人</small></a></h3>
+        <div>人的一生应当有许多停靠站，我但愿每一个站台都有一盏雾中的灯。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="vcomments"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/2021/07/09/%E6%8A%80%E6%9C%AF/%E5%85%B6%E4%BB%96/IDEA%E5%BF%AB%E6%8D%B7%E9%94%AE(mac)/" title="IDEA快捷键(Mac)"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo, wechat" data-mobile-sites="weibo, wechat"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lights8080" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="https://www.zhihu.com/people/lights8080" target="_blank" title="Zhihu" data-toggle=tooltip data-placement=top><i class="icon icon-zhihu"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	<!-- Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>. -->
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+
+
+
+
+   
+    
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/valine"></script>
+  <script type="text/javascript">
+  var GUEST = ['nick', 'mail', 'link'];
+  var meta = 'nick,mail,link';
+  meta = meta.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#vcomments',
+    verify: false,
+    notify: false,
+    appId: '0A4Cg4vm7SmX0sfL9lfvExSq-gzGzoHsz',
+    appKey: 'jkuwap2Fh3CKBlP1SO59uyb4',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: meta,
+    pageSize: '10' || 10,
+    visitor: true
+  });
+  </script>
+
+     
+
+
+
+
+
+
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?d3fc7929daaac13ce6f82be8d6f62525";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+</body>
+</html>
